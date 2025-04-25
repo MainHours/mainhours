@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { News } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
 
 interface NewsCardProps {
   title: string;
@@ -34,7 +34,7 @@ const NewsCard = ({
       <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <CardDescription className="flex items-center text-sm">
-            <News className="h-3 w-3 mr-1" />
+            <Newspaper className="h-3 w-3 mr-1" />
             {source}
           </CardDescription>
           <CardDescription className="text-xs">{time}</CardDescription>

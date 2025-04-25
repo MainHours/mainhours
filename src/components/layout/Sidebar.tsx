@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Activity, Users, Search, TrendingUp, BarChart, News, Weather } from 'lucide-react';
+import { Activity, Users, Search, TrendingUp, BarChart, Newspaper, CloudSunRain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
@@ -24,7 +24,7 @@ const navItems = [
   {
     title: "News",
     href: "/news",
-    icon: <News className="h-5 w-5" />,
+    icon: <Newspaper className="h-5 w-5" />,
   },
   {
     title: "Finance",
@@ -39,7 +39,7 @@ const navItems = [
   {
     title: "Weather",
     href: "/weather",
-    icon: <Weather className="h-5 w-5" />,
+    icon: <CloudSunRain className="h-5 w-5" />,
   },
 ];
 
