@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MessageSquare, Activity } from 'lucide-react';
@@ -10,11 +11,11 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
-            <div className="rounded-full p-1">
+            <div className="rounded-full bg-gray-100 p-1">
               <img 
                 src="/lovable-uploads/f65d98ab-d9f7-4561-a13e-18e5a61bada7.png" 
                 alt="MainHours Logo" 
-                className="h-8 w-8"
+                className="h-8 w-8 object-contain rounded-full"
               />
             </div>
             <span className="ml-2 text-xl font-bold text-black">MainHours</span>
@@ -63,3 +64,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
