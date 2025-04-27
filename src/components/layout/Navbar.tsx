@@ -1,10 +1,29 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, MessageSquare, Activity } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 const Navbar = () => {
-  return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Logged out successfully');
+      navigate('/');
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
@@ -40,14 +59,27 @@ const Navbar = () => {
               <span>AI Assistant</span>
             </Link>
           </Button>
-          <Button asChild>
-            <Link to="/profile">
-              <span className="hidden md:inline">My Profile</span>
-              <span className="inline md:hidden">Profile</span>
-            </Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild>
+                <Link to="/profile">
+                  <span className="hidden md:inline">My Profile</span>
+                  <span className="inline md:hidden">Profile</span>
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button asChild>
+              <Link to="/auth">Login</Link>
+            </Button>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Navbar;
