@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
+import Footer from '@/components/layout/Footer';
 import FeaturedPost from '@/components/dashboard/FeaturedPost';
 import AIAssistant from '@/components/dashboard/AIAssistant';
 import SearchBox from '@/components/dashboard/SearchBox';
@@ -93,6 +94,7 @@ const Index = () => {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   );
 };
