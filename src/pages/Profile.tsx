@@ -32,8 +32,8 @@ const Profile = () => {
       if (!file) return;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-avatar.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Math.random().toString(36).slice(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${user.id}/${fileName}`;
 
       // Upload image to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -56,8 +56,12 @@ const Profile = () => {
 
       setAvatarUrl(publicUrl);
       toast.success('Avatar updated successfully');
+      
+      // Log for debugging
+      console.log('Avatar uploaded successfully:', publicUrl);
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Avatar upload error:', error);
+      toast.error(`Avatar upload failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -126,7 +130,7 @@ const Profile = () => {
             />
             <Label htmlFor="avatar-upload">
               <Button variant="outline" className="cursor-pointer" disabled={loading}>
-                Change Avatar
+                {loading ? 'Uploading...' : 'Change Avatar'}
               </Button>
             </Label>
           </div>
