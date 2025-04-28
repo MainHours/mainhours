@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import CookieConsent from "@/components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import Social from "./pages/Social";
 import AI from "./pages/AI";
 import Search from "./pages/Search";
@@ -27,6 +28,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/social" element={<Social />} />
             <Route path="/ai" element={<AI />} />
             <Route path="/search" element={<Search />} />
