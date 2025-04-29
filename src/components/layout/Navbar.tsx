@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MessageSquare, Activity } from 'lucide-react';
@@ -7,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 const Navbar = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
-
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     } else {
@@ -22,7 +23,6 @@ const Navbar = () => {
       navigate('/');
     }
   };
-
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -30,14 +30,12 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
-
-  return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+  return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <div className="rounded-full bg-gray-100 p-1">
-              <img src="/lovable-uploads/f65d98ab-d9f7-4561-a13e-18e5a61bada7.png" alt="MainHours Logo" className="h-8 w-8 rounded-full object-none" />
+              <img src="/lovable-uploads/f65d98ab-d9f7-4561-a13e-18e5a61bada7.png" alt="MainHours Logo" className="h-8 w-8 rounded-full object-contain" />
             </div>
             <span className="ml-2 text-xl font-bold text-black">MainHours</span>
           </Link>
@@ -46,13 +44,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center flex-1 px-4 md:px-8">
           <form className="relative w-full max-w-sm" onSubmit={handleNavSearch}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              type="search" 
-              placeholder="Search MainHours..." 
-              className="w-full rounded-full bg-muted pl-8 md:w-[300px] lg:w-[400px]"
-              value={navQuery}
-              onChange={(e) => setNavQuery(e.target.value)}
-            />
+            <Input type="search" placeholder="Search MainHours..." className="w-full rounded-full bg-muted pl-8 md:w-[300px] lg:w-[400px]" value={navQuery} onChange={e => setNavQuery(e.target.value)} />
           </form>
         </div>
         
@@ -74,8 +66,7 @@ const Navbar = () => {
               <span>AI Assistant</span>
             </Link>
           </Button>
-          {user ? (
-            <>
+          {user ? <>
               <Button asChild>
                 <Link to="/profile">
                   <span className="hidden md:inline">My Profile</span>
@@ -85,16 +76,11 @@ const Navbar = () => {
               <Button variant="outline" onClick={handleLogout}>
                 Logout
               </Button>
-            </>
-          ) : (
-            <Button asChild>
+            </> : <Button asChild>
               <Link to="/auth">Login</Link>
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Navbar;
