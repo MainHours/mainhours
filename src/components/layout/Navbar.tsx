@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MessageSquare, Activity } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 const Navbar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [navQuery, setNavQuery] = useState('');
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -19,6 +20,14 @@ const Navbar = () => {
     } else {
       toast.success('Logged out successfully');
       navigate('/');
+    }
+  };
+
+  const handleNavSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (navQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(navQuery.trim())}`);
+      setNavQuery('');
     }
   };
 
@@ -35,10 +44,16 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex items-center flex-1 px-4 md:px-8">
-          <div className="relative w-full max-w-sm">
+          <form className="relative w-full max-w-sm" onSubmit={handleNavSearch}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Search MainHours..." className="w-full rounded-full bg-muted pl-8 md:w-[300px] lg:w-[400px]" />
-          </div>
+            <Input 
+              type="search" 
+              placeholder="Search MainHours..." 
+              className="w-full rounded-full bg-muted pl-8 md:w-[300px] lg:w-[400px]"
+              value={navQuery}
+              onChange={(e) => setNavQuery(e.target.value)}
+            />
+          </form>
         </div>
         
         <div className="flex items-center gap-4">

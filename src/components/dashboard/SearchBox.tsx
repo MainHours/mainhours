@@ -4,15 +4,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SearchBox = () => {
   const [query, setQuery] = useState('');
+  const navigate = useNavigate();
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query) {
+    if (query.trim()) {
       console.log('Searching for:', query);
-      // In a real app, we would redirect to search results page with the query
+      // Redirect to search page with the query
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
