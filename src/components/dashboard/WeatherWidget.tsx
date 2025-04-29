@@ -5,8 +5,35 @@ import { Badge } from '@/components/ui/badge';
 import { Thermometer, Wind, CloudDrizzle, CloudSun } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Define the location type
+interface Location {
+  lat: number;
+  lon: number;
+}
+
+// Define the current weather type
+interface CurrentWeather {
+  location: string;
+  temperature: number;
+  condition: string;
+  high: number;
+  low: number;
+  humidity: number;
+  windSpeed: number;
+  windDirection: string;
+  icon: string;
+}
+
+// Define the forecast type
+interface ForecastDay {
+  day: string;
+  temp: number;
+  condition: string;
+  icon: string;
+}
+
 const WeatherWidget = () => {
-  const [currentWeather, setCurrentWeather] = useState({
+  const [currentWeather, setCurrentWeather] = useState<CurrentWeather>({
     location: "Loading...",
     temperature: 0,
     condition: "Loading...",
@@ -18,7 +45,7 @@ const WeatherWidget = () => {
     icon: "☁️"
   });
 
-  const [forecast, setForecast] = useState([
+  const [forecast, setForecast] = useState<ForecastDay[]>([
     { day: "...", temp: 0, condition: "Loading", icon: "..." },
     { day: "...", temp: 0, condition: "Loading", icon: "..." },
     { day: "...", temp: 0, condition: "Loading", icon: "..." },
@@ -29,7 +56,7 @@ const WeatherWidget = () => {
   const [loading, setLoading] = useState(true);
 
   // Helper function to get weather icon
-  const getWeatherIcon = (condition) => {
+  const getWeatherIcon = (condition: string): string => {
     const conditionLower = condition.toLowerCase();
     if (conditionLower.includes('rain') || conditionLower.includes('drizzle')) return '🌧️';
     if (conditionLower.includes('cloud')) return '☁️';
@@ -42,13 +69,13 @@ const WeatherWidget = () => {
   };
 
   // Get day of the week
-  const getDayOfWeek = (dateString) => {
+  const getDayOfWeek = (dateString: string | Date): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
   // Get user's location using browser geolocation
-  const getUserLocation = () => {
+  const getUserLocation = (): Promise<Location> => {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -73,7 +100,7 @@ const WeatherWidget = () => {
   };
 
   // Get city name from coordinates using reverse geocoding
-  const getCityName = async (lat, lon) => {
+  const getCityName = async (lat: number, lon: number): Promise<string> => {
     try {
       const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
       const data = await response.json();
@@ -122,7 +149,7 @@ const WeatherWidget = () => {
         });
         
         // Set forecast for next 5 days
-        const forecastData = [];
+        const forecastData: ForecastDay[] = [];
         for (let i = 0; i < 5; i++) {
           const forecastDate = new Date(today);
           forecastDate.setDate(today.getDate() + i + 1);
