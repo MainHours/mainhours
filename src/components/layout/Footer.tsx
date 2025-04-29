@@ -45,8 +45,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@mainhours.com" className="text-muted-foreground hover:text-primary">
-                  support@mainhours.com
+                <a href="mailto:mh.software@proton.me" className="text-muted-foreground hover:text-primary">
+                  mh.software@proton.me
                 </a>
               </li>
             </ul>
