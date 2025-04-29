@@ -14,6 +14,7 @@ import AI from "./pages/AI";
 import Search from "./pages/Search";
 import News from "./pages/News";
 import Finance from "./pages/Finance";
+import Climate from "./pages/Climate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/news" element={<News />} />
             <Route path="/finance" element={<Finance />} />
+            <Route path="/climate" element={<Climate />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
