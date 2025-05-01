@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { Separator } from "@/components/ui/separator";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +46,23 @@ const Auth = () => {
     } catch (error: any) {
       toast.error(error.message);
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        }
+      });
+      if (error) throw error;
+      // No need for toast success here as we're being redirected
+    } catch (error: any) {
+      toast.error(error.message);
       setIsLoading(false);
     }
   };
@@ -98,6 +116,29 @@ const Auth = () => {
               {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
           </form>
+          
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle">
+              <circle cx="12" cy="12" r="10"></circle>
+              <rect x="9" y="9" width="6" height="6" fill="red"></rect>
+            </svg>
+            Sign in with Google
+          </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button
