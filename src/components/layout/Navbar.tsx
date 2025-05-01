@@ -1,17 +1,29 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MessageSquare, Activity } from 'lucide-react';
+import { Search, MessageSquare, Activity, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 const Navbar = () => {
   const {
     user
   } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
+  
   const handleLogout = async () => {
     const {
       error
@@ -23,6 +35,7 @@ const Navbar = () => {
       navigate('/');
     }
   };
+  
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -30,6 +43,7 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
+  
   return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
@@ -66,21 +80,45 @@ const Navbar = () => {
               <span>AI Assistant</span>
             </Link>
           </Button>
-          {user ? <>
-              <Button asChild>
-                <Link to="/profile">
-                  <span className="hidden md:inline">My Profile</span>
-                  <span className="inline md:hidden">Profile</span>
-                </Link>
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                Logout
-              </Button>
-            </> : <Button asChild>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    {user.user_metadata?.avatar_url ? (
+                      <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata?.full_name || user.email || ''} />
+                    ) : (
+                      <AvatarFallback>
+                        {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild>
               <Link to="/auth">Login</Link>
-            </Button>}
+            </Button>
+          )}
         </div>
       </div>
     </header>;
 };
+
 export default Navbar;

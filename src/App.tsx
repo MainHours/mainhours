@@ -9,6 +9,7 @@ import CookieConsent from "@/components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import Social from "./pages/Social";
 import AI from "./pages/AI";
 import Search from "./pages/Search";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/social" element={<Social />} />
             <Route path="/ai" element={<AI />} />
             <Route path="/search" element={<Search />} />
