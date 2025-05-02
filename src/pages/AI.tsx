@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 const AI = () => {
   const isMobile = useIsMobile();
   const [messages, setMessages] = React.useState([
-    { sender: 'ai', content: "Hello! I'm your AI assistant powered by GPT-4o. How can I help you today?" }
+    { sender: 'ai', content: "Hello! I'm Nebulosa. How can I help you today?" }
   ]);
   const [input, setInput] = React.useState('');
 
