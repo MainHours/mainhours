@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const AI = () => {
   const isMobile = useIsMobile();
@@ -15,35 +17,47 @@ const AI = () => {
     { sender: 'ai', content: "Hello! I'm Nebulosa. How can I help you today?" }
   ]);
   const [input, setInput] = React.useState('');
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (input.trim()) {
-      // Add user message
-      setMessages([...messages, { sender: 'user', content: input }]);
-      
-      // Simulate AI response
-      setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          { sender: 'ai', content: getAIResponse(input) }
-        ]);
-      }, 1000);
-      
-      setInput('');
-    }
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const getAIResponse = (query: string) => {
-    // This is a simple simulation of AI responses
-    const responses = [
-      `I understand you're asking about "${query}". This topic is quite interesting! Let me provide some insights...`,
-      `Thanks for asking about "${query}". Here's what I can tell you based on my knowledge...`,
-      `"${query}" is a fascinating subject! Here are some key points to consider...`,
-      `I'd be happy to help with your question about "${query}". Based on the latest information...`,
-      `Regarding "${query}", there are several important aspects to consider...`
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (input.trim() && !isProcessing) {
+      // Add user message
+      const userMessage = { sender: 'user', content: input };
+      setMessages(prev => [...prev, userMessage]);
+      setInput('');
+      setIsProcessing(true);
+      
+      try {
+        // Send request to AI assistant edge function
+        const { data, error } = await supabase.functions.invoke('ai-assistant', {
+          body: { message: input.trim() }
+        });
+        
+        if (error) throw new Error(error.message);
+        
+        // Add AI response
+        setTimeout(() => {
+          setMessages(prev => [
+            ...prev,
+            { sender: 'ai', content: data.response }
+          ]);
+          setIsProcessing(false);
+        }, 500);
+      } catch (error) {
+        console.error('AI assistant error:', error);
+        toast.error('Failed to get AI response. Please try again.');
+        setIsProcessing(false);
+      }
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -123,6 +137,22 @@ const AI = () => {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
+                
+                {isProcessing && (
+                  <div className="flex justify-start">
+                    <div className="flex gap-3 max-w-[80%]">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src="https://github.com/shadcn.png" alt="AI" />
+                        <AvatarFallback>AI</AvatarFallback>
+                      </Avatar>
+                      <div className="rounded-lg p-4 bg-muted flex items-center">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <span>Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
               
               <CardFooter className="pt-4 border-t">
@@ -133,10 +163,23 @@ const AI = () => {
                     onKeyDown={handleKeyPress}
                     placeholder="Ask me anything..." 
                     className="flex-grow min-h-[80px]"
+                    disabled={isProcessing}
                   />
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-muted-foreground">Press Enter to send</p>
-                    <Button onClick={handleSend}>Send Message</Button>
+                    <Button 
+                      onClick={handleSend} 
+                      disabled={isProcessing || !input.trim()}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Message'
+                      )}
+                    </Button>
                   </div>
                 </div>
               </CardFooter>

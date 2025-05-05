@@ -3,19 +3,27 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBox = () => {
   const [query, setQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
   
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      console.log('Searching for:', query);
-      // Redirect to search page with the query
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      setIsSearching(true);
+      try {
+        console.log('Searching for:', query);
+        // Redirect to search page with the query
+        navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      } catch (error) {
+        console.error('Search error:', error);
+      } finally {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -39,7 +47,16 @@ const SearchBox = () => {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <Button type="submit">Search</Button>
+          <Button type="submit" disabled={isSearching}>
+            {isSearching ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              'Search'
+            )}
+          </Button>
         </form>
       </CardContent>
       <CardFooter className="text-sm text-muted-foreground">

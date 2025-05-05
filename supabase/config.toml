@@ -1,1 +1,8 @@
-project_id = "rijldvcoabidmdmenyic"
+
+project_id = "your-project-id"
+
+[functions.search]
+verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false

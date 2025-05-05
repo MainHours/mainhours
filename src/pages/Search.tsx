@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Search as SearchIcon, Loader2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SearchResult {
   title: string;
@@ -26,6 +27,7 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchTime, setSearchTime] = useState(0);
   
   // Extract query from URL on page load
   useEffect(() => {
@@ -51,50 +53,26 @@ const Search = () => {
     setHasSearched(true);
     
     try {
-      // Here we're using mock data, but in a real app you would connect to a search API
-      console.log('Searching for:', searchQuery);
+      const startTime = performance.now();
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Call the Supabase edge function to get search results
+      const { data, error } = await supabase.functions.invoke('search', {
+        body: { query: searchQuery }
+      });
       
-      // Mock search results based on query
-      const mockResults: SearchResult[] = [
-        {
-          title: `Results for "${searchQuery}" - Main article`,
-          url: `https://example.com/search/${encodeURIComponent(searchQuery)}`,
-          description: `A comprehensive guide about ${searchQuery} with detailed information and resources.`,
-          type: "article"
-        },
-        {
-          title: `${searchQuery} - Wikipedia`,
-          url: `https://en.wikipedia.org/wiki/${encodeURIComponent(searchQuery)}`,
-          description: `Wikipedia article about ${searchQuery} with facts, history and references.`,
-          type: "article" 
-        },
-        {
-          title: `Latest News about ${searchQuery}`,
-          url: `https://news.example.com/topics/${encodeURIComponent(searchQuery)}`,
-          description: `Breaking news and recent updates about ${searchQuery} from reliable sources.`,
-          type: "news"
-        },
-        {
-          title: `${searchQuery} Research Papers`,
-          url: `https://academic.example.com/research/${encodeURIComponent(searchQuery)}`,
-          description: `Academic papers and scientific research related to ${searchQuery}.`,
-          type: "research"
-        },
-        {
-          title: `Learn about ${searchQuery} - Tutorial`,
-          url: `https://learn.example.com/${encodeURIComponent(searchQuery)}`,
-          description: `Step-by-step tutorial and learning resources about ${searchQuery} for beginners to advanced users.`,
-          type: "tutorial"
-        }
-      ];
+      const endTime = performance.now();
+      setSearchTime((endTime - startTime) / 1000); // Convert to seconds
       
-      setSearchResults(mockResults);
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      console.log('Search results:', data.results);
+      setSearchResults(data.results || []);
     } catch (error) {
       console.error('Search error:', error);
       toast.error('Failed to perform search. Please try again.');
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +154,7 @@ const Search = () => {
                 </div>
                 
                 <div className="mb-4 text-sm text-muted-foreground">
-                  About {searchResults.length} results (0.25 seconds)
+                  About {searchResults.length} results ({searchTime.toFixed(2)} seconds)
                 </div>
                 
                 <div>
