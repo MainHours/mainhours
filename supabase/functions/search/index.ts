@@ -27,50 +27,49 @@ serve(async (req) => {
 
     console.log(`Searching for: ${query}`);
     
-    // Construct search results based on the query
-    // This is a simplified version - in a real implementation, you would connect to a search API
+    // Create search results based on the query with real URLs
     const results = [
-      {
-        title: `${query} - Main search result`,
-        url: `https://example.com/search/${encodeURIComponent(query)}`,
-        description: `Comprehensive information about ${query} with detailed resources and explanations.`,
-        type: "article"
-      },
       {
         title: `${query} - Wikipedia`,
         url: `https://en.wikipedia.org/wiki/${encodeURIComponent(query)}`,
         description: `Wikipedia article about ${query} providing factual information, history, and relevant details.`,
-        type: "article" 
+        type: "article"
       },
       {
-        title: `Latest News about ${query}`,
-        url: `https://news.example.com/topics/${encodeURIComponent(query)}`,
-        description: `Breaking news and recent updates about ${query} from reliable sources worldwide.`,
-        type: "news"
+        title: `${query} - Google Search`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+        description: `Search Google for more information about ${query}.`,
+        type: "search"
       },
       {
-        title: `${query} Research and Studies`,
-        url: `https://academic.example.com/research/${encodeURIComponent(query)}`,
-        description: `Academic papers, scientific research, and studies related to ${query} from top institutions.`,
-        type: "research"
-      },
-      {
-        title: `Learn about ${query} - Comprehensive Guide`,
-        url: `https://learn.example.com/${encodeURIComponent(query)}`,
-        description: `Step-by-step tutorials and learning resources about ${query} for beginners to advanced users.`,
-        type: "tutorial"
-      },
-      {
-        title: `${query} Videos`,
-        url: `https://videos.example.com/search?q=${encodeURIComponent(query)}`,
-        description: `Watch videos about ${query} including tutorials, explanations, and demonstrations.`,
+        title: `${query} - YouTube`,
+        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+        description: `Watch videos about ${query} on YouTube.`,
         type: "video"
       },
       {
-        title: `${query} Images and Graphics`,
-        url: `https://images.example.com/search?q=${encodeURIComponent(query)}`,
-        description: `Browse through a collection of images, illustrations, and graphics related to ${query}.`,
-        type: "image"
+        title: `${query} - Reddit Discussions`,
+        url: `https://www.reddit.com/search/?q=${encodeURIComponent(query)}`,
+        description: `Join discussions about ${query} on Reddit.`,
+        type: "forum"
+      },
+      {
+        title: `${query} - Twitter / X`,
+        url: `https://twitter.com/search?q=${encodeURIComponent(query)}`,
+        description: `See what people are saying about ${query} on Twitter/X.`,
+        type: "social"
+      },
+      {
+        title: `${query} - GitHub`,
+        url: `https://github.com/search?q=${encodeURIComponent(query)}`,
+        description: `Find repositories and code related to ${query} on GitHub.`,
+        type: "code"
+      },
+      {
+        title: `${query} - Amazon Products`,
+        url: `https://www.amazon.com/s?k=${encodeURIComponent(query)}`,
+        description: `Shop for products related to ${query} on Amazon.`,
+        type: "shopping"
       }
     ];
 

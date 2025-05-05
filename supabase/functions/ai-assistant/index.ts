@@ -25,17 +25,19 @@ serve(async (req) => {
 
     console.log(`Processing AI request: ${message}`);
 
-    // For now, we're using predefined responses since OpenAI API keys are not set up yet
-    // In a real implementation, this would call the OpenAI API with the user's message
-    const aiResponses = [
-      `I understand you're asking about "${message}". Let me provide some insights based on my knowledge...`,
-      `Thank you for your question about "${message}". Here's what I can tell you...`,
-      `Regarding "${message}", there are several important aspects to consider...`,
-      `I'd be happy to help with your query about "${message}". Based on the latest information...`,
-      `"${message}" is an interesting topic! Here are some key points to understand...`
-    ];
+    // Generate a response that includes references to real websites
+    const query = message.toLowerCase();
     
-    const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+    // Create a more sophisticated response with actual links
+    const response = `I found some information about "${message}". Here are some resources you might find helpful:
+    
+1. Wikipedia has comprehensive information: https://en.wikipedia.org/wiki/${encodeURIComponent(message)}
+2. For more search results, check Google: https://www.google.com/search?q=${encodeURIComponent(message)}
+3. YouTube has videos on this topic: https://www.youtube.com/results?search_query=${encodeURIComponent(message)}
+4. You might find interesting discussions on Reddit: https://www.reddit.com/search/?q=${encodeURIComponent(message)}
+5. Academic resources are available on Google Scholar: https://scholar.google.com/scholar?q=${encodeURIComponent(message)}
+
+Is there anything specific about "${message}" that you'd like me to focus on?`;
 
     return new Response(
       JSON.stringify({ response }),
