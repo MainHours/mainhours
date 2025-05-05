@@ -1,8 +1,5 @@
 
-project_id = "your-project-id"
+project_id = "rijldvcoabidmdmenyic"
 
-[functions.search]
-verify_jwt = false
-
-[functions.ai-assistant]
+[functions.news-api]
 verify_jwt = false

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Newspaper } from 'lucide-react';
+import { Newspaper, ExternalLink } from 'lucide-react';
 
 interface NewsCardProps {
   title: string;
@@ -11,6 +11,7 @@ interface NewsCardProps {
   category: string;
   imageUrl: string;
   time: string;
+  url?: string; // Added URL field for the news article
 }
 
 const NewsCard = ({
@@ -19,15 +20,27 @@ const NewsCard = ({
   source,
   category,
   imageUrl,
-  time
+  time,
+  url
 }: NewsCardProps) => {
+  const handleReadMore = (e: React.MouseEvent) => {
+    if (!url) {
+      e.preventDefault();
+      return;
+    }
+  };
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden h-full flex flex-col">
       <div className="relative h-40">
         <img 
-          src={imageUrl} 
+          src={imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmV3c3xlbnwwfHwwfHx8MA%3D%3D'} 
           alt={title}
           className="object-cover w-full h-full"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmV3c3xlbnwwfHwwfHx8MA%3D%3D';
+          }}
         />
         <Badge className="absolute top-2 right-2">{category}</Badge>
       </div>
@@ -42,10 +55,22 @@ const NewsCard = ({
         <CardTitle className="text-lg line-clamp-2">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <a href="#" className="text-sm text-mainhours-purple hover:underline">Read more</a>
+      <CardFooter className="p-4 pt-0 mt-auto">
+        {url ? (
+          <a 
+            href={url} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-sm text-mainhours-purple hover:underline flex items-center"
+            onClick={handleReadMore}
+          >
+            Read more <ExternalLink className="h-3 w-3 ml-1" />
+          </a>
+        ) : (
+          <span className="text-sm text-muted-foreground">No link available</span>
+        )}
       </CardFooter>
     </Card>
   );
