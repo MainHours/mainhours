@@ -63,7 +63,7 @@ const NewsCard = ({
             href={url} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-sm text-mainhours-purple hover:underline flex items-center"
+            className="text-sm text-primary hover:underline flex items-center"
             onClick={handleReadMore}
           >
             Read more <ExternalLink className="h-3 w-3 ml-1" />
