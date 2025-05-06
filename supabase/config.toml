@@ -3,3 +3,7 @@ project_id = "rijldvcoabidmdmenyic"
 
 [functions.news-api]
 verify_jwt = false
+
+[functions.news-search]
+verify_jwt = false
+

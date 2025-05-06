@@ -7,16 +7,22 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search as SearchIcon, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, Loader2, Calendar, Clock, Link as LinkIcon, ExternalLink, Bookmark, Share2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { Avatar } from '@/components/ui/avatar';
 
 interface SearchResult {
   title: string;
   url: string;
   description: string;
   type: string;
+  source?: string;
+  date?: string;
 }
 
 const Search = () => {
@@ -28,6 +34,8 @@ const Search = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchTime, setSearchTime] = useState(0);
+  const [relatedQueries, setRelatedQueries] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState('all');
   
   // Extract query from URL on page load
   useEffect(() => {
@@ -55,8 +63,8 @@ const Search = () => {
     try {
       const startTime = performance.now();
       
-      // Call the Supabase edge function to get search results
-      const { data, error } = await supabase.functions.invoke('search', {
+      // Call the Supabase edge function to get enhanced search results
+      const { data, error } = await supabase.functions.invoke('news-search', {
         body: { query: searchQuery }
       });
       
@@ -67,12 +75,14 @@ const Search = () => {
         throw new Error(error.message);
       }
       
-      console.log('Search results:', data.results);
+      console.log('Search results:', data);
       setSearchResults(data.results || []);
+      setRelatedQueries(data.relatedQueries || []);
     } catch (error) {
       console.error('Search error:', error);
       toast.error('Failed to perform search. Please try again.');
       setSearchResults([]);
+      setRelatedQueries([]);
     } finally {
       setIsLoading(false);
     }
@@ -82,18 +92,101 @@ const Search = () => {
     // Open the URL in a new tab
     window.open(url, '_blank', 'noopener,noreferrer');
   };
+
+  const handleRelatedQueryClick = (relatedQuery: string) => {
+    setQuery(relatedQuery);
+    navigate(`/search?q=${encodeURIComponent(relatedQuery)}`);
+    performSearch(relatedQuery);
+  };
+  
+  const getTypeColor = (type: string) => {
+    const typeColors: Record<string, string> = {
+      news: 'bg-blue-500',
+      article: 'bg-green-500',
+      search: 'bg-gray-500',
+      video: 'bg-red-500',
+      forum: 'bg-yellow-500',
+      social: 'bg-purple-500',
+      code: 'bg-emerald-500',
+      shopping: 'bg-pink-500',
+      analysis: 'bg-indigo-500',
+      opinion: 'bg-amber-500',
+      explainer: 'bg-cyan-500',
+      history: 'bg-lime-500',
+      academic: 'bg-violet-500',
+    };
+    
+    return typeColors[type] || 'bg-gray-500';
+  };
   
   const renderSearchResult = (result: SearchResult, index: number) => {
     return (
-      <div key={index} className="mb-6 cursor-pointer" onClick={() => handleResultClick(result.url)}>
-        <h3 className="text-lg font-medium text-blue-600 hover:underline">
-          {result.title}
-        </h3>
-        <p className="text-sm text-green-700 mb-1">{result.url}</p>
-        <p className="text-sm text-gray-600">{result.description}</p>
+      <div key={index} className="mb-8 hover:bg-slate-50 p-4 rounded-lg transition-colors">
+        <div className="flex items-start gap-3 mb-2">
+          {result.source && (
+            <Avatar className="h-6 w-6">
+              <div className={`h-6 w-6 flex items-center justify-center rounded-full ${getTypeColor(result.type)}`}>
+                <span className="text-white text-xs font-bold">{result.source[0]}</span>
+              </div>
+            </Avatar>
+          )}
+          <div>
+            <h3 className="text-xl font-medium text-blue-600 hover:underline cursor-pointer" onClick={() => handleResultClick(result.url)}>
+              {result.title}
+            </h3>
+            <div className="flex items-center text-sm text-green-700 mb-1">
+              <LinkIcon className="h-3 w-3 mr-1" />
+              <span className="mr-2 max-w-[300px] truncate">{result.url}</span>
+              {result.source && <span className="text-gray-600">· {result.source}</span>}
+            </div>
+          </div>
+        </div>
+        
+        <p className="text-sm text-gray-600 mb-2">{result.description}</p>
+        
+        <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+          {result.date && (
+            <div className="flex items-center">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>{format(new Date(result.date), 'MMM d, yyyy')}</span>
+            </div>
+          )}
+          <Badge variant="outline" className={`text-xs ${getTypeColor(result.type)} bg-opacity-10 border-none text-gray-700`}>
+            {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
+          </Badge>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="h-6 px-2">
+              <ThumbsUp className="h-3 w-3 mr-1" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 px-2">
+              <ThumbsDown className="h-3 w-3 mr-1" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 px-2">
+              <Bookmark className="h-3 w-3" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 px-2">
+              <Share2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
       </div>
     );
   };
+
+  const renderSearchResultSkeleton = () => {
+    return (
+      <div className="mb-6">
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2 mb-1" />
+        <Skeleton className="h-4 w-full mb-1" />
+        <Skeleton className="h-4 w-11/12 mb-1" />
+      </div>
+    );
+  };
+
+  const filteredResults = activeTab === 'all' 
+    ? searchResults 
+    : searchResults.filter(result => result.type === activeTab.toLowerCase());
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -106,13 +199,18 @@ const Search = () => {
         )}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Search</h1>
+            <div className="mb-8 flex items-center gap-2">
+              <div className="bg-blue-500 text-white p-2 rounded-lg">
+                <SearchIcon className="h-6 w-6" />
+              </div>
+              <h1 className="text-3xl font-bold">MainHours Search</h1>
+            </div>
             
-            <Card className="mb-8">
+            <Card className="mb-8 shadow-md">
               <CardContent className="pt-6">
                 <form onSubmit={handleSearch} className="flex w-full items-center gap-2">
                   <div className="relative flex-grow">
-                    <SearchIcon className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
+                    <SearchIcon className="absolute left-2.5 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="search"
                       placeholder="Search the web..."
@@ -136,29 +234,100 @@ const Search = () => {
             </Card>
             
             {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : hasSearched ? (
               <div>
                 <div className="mb-6">
                   <Tabs defaultValue="all" className="w-full">
                     <TabsList>
                       <TabsTrigger value="all">All</TabsTrigger>
-                      <TabsTrigger value="images">Images</TabsTrigger>
-                      <TabsTrigger value="videos">Videos</TabsTrigger>
                       <TabsTrigger value="news">News</TabsTrigger>
-                      <TabsTrigger value="maps">Maps</TabsTrigger>
+                      <TabsTrigger value="videos">Videos</TabsTrigger>
+                      <TabsTrigger value="images">Images</TabsTrigger>
+                      <TabsTrigger value="academic">Academic</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
                 
                 <div className="mb-4 text-sm text-muted-foreground">
-                  About {searchResults.length} results ({searchTime.toFixed(2)} seconds)
+                  Searching...
                 </div>
                 
                 <div>
-                  {searchResults.map((result, index) => renderSearchResult(result, index))}
+                  {[1, 2, 3, 4, 5].map((_, index) => renderSearchResultSkeleton())}
+                </div>
+              </div>
+            ) : hasSearched ? (
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="md:w-3/4">
+                  <div className="mb-6">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                      <TabsList className="w-full md:w-auto overflow-x-auto">
+                        <TabsTrigger value="all">All</TabsTrigger>
+                        <TabsTrigger value="news">News</TabsTrigger>
+                        <TabsTrigger value="video">Videos</TabsTrigger>
+                        <TabsTrigger value="academic">Academic</TabsTrigger>
+                        <TabsTrigger value="history">History</TabsTrigger>
+                        <TabsTrigger value="opinion">Opinions</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  
+                  <div className="mb-6 text-sm text-muted-foreground flex items-center gap-1">
+                    About <span className="font-bold">{filteredResults.length}</span> results ({searchTime.toFixed(2)} seconds)
+                  </div>
+                  
+                  {filteredResults.length > 0 ? (
+                    <div>
+                      {filteredResults.map((result, index) => renderSearchResult(result, index))}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>No results found</CardTitle>
+                        <CardDescription>
+                          We couldn't find any {activeTab !== 'all' ? activeTab : ''} results for "{query}". Try a different search term.
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  )}
+                </div>
+                
+                <div className="md:w-1/4">
+                  {relatedQueries.length > 0 && (
+                    <Card className="mb-6">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Related Searches</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2">
+                          {relatedQueries.map((relatedQuery, index) => (
+                            <li key={index}>
+                              <Button 
+                                variant="link" 
+                                className="text-blue-600 p-0 h-auto font-normal text-left w-full justify-start"
+                                onClick={() => handleRelatedQueryClick(relatedQuery)}
+                              >
+                                {relatedQuery}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">Search Tips</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-4">
+                        <li>Use quotes for exact phrases: "climate change"</li>
+                        <li>Add - to exclude words: climate -politics</li>
+                        <li>Use site: to search specific websites: site:bbc.com</li>
+                        <li>Add filetype: for specific files: report filetype:pdf</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             ) : (
@@ -172,20 +341,20 @@ const Search = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
-                      <h3 className="font-medium mb-1">Web Search</h3>
-                      <p className="text-sm text-muted-foreground">Search for information, articles, and websites</p>
-                    </div>
-                    <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
-                      <h3 className="font-medium mb-1">Image Search</h3>
-                      <p className="text-sm text-muted-foreground">Find images from around the web</p>
-                    </div>
-                    <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
                       <h3 className="font-medium mb-1">News Search</h3>
-                      <p className="text-sm text-muted-foreground">Discover the latest news articles</p>
+                      <p className="text-sm text-muted-foreground">Find the latest news articles and updates</p>
                     </div>
                     <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
                       <h3 className="font-medium mb-1">Academic Search</h3>
                       <p className="text-sm text-muted-foreground">Find scholarly articles and research papers</p>
+                    </div>
+                    <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
+                      <h3 className="font-medium mb-1">Video Search</h3>
+                      <p className="text-sm text-muted-foreground">Find videos from various sources</p>
+                    </div>
+                    <div className="border rounded-lg p-4 hover:bg-muted cursor-pointer">
+                      <h3 className="font-medium mb-1">Opinion & Analysis</h3>
+                      <p className="text-sm text-muted-foreground">Find expert opinions and analysis</p>
                     </div>
                   </div>
                 </CardContent>

@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, BarChart2, Book, Newspaper } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 const SearchBox = () => {
   const [query, setQuery] = useState('');
@@ -27,12 +28,23 @@ const SearchBox = () => {
     }
   };
 
+  const trendingSearches = [
+    'Climate Change',
+    'AI Technology',
+    'Renewable Energy',
+    'Global Economy'
+  ];
+
+  const handleTrendingClick = (trend: string) => {
+    navigate(`/search?q=${encodeURIComponent(trend)}`);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center gap-2">
           <Search className="h-5 w-5" />
-          Search Engine
+          MainHours Search
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -58,9 +70,35 @@ const SearchBox = () => {
             )}
           </Button>
         </form>
+
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+            <BarChart2 className="h-4 w-4" />
+            <span>Trending searches</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {trendingSearches.map((trend, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="cursor-pointer hover:bg-secondary"
+                onClick={() => handleTrendingClick(trend)}
+              >
+                {trend}
+              </Badge>
+            ))}
+          </div>
+        </div>
       </CardContent>
-      <CardFooter className="text-sm text-muted-foreground">
-        Search powered by advanced AI technology
+      <CardFooter className="flex justify-between text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Newspaper className="h-4 w-4" />
+          <span>News</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Book className="h-4 w-4" />
+          <span>Academic</span>
+        </div>
       </CardFooter>
     </Card>
   );
