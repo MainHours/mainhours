@@ -18,6 +18,11 @@
     "language": "Sprache",
     "languageDesc": "Wählen Sie Ihre bevorzugte Sprache für die MainHours-Oberfläche"
   },
+  "trends": {
+    "topicTitle": "Trendthemen",
+    "weeklyActivity": "Wöchentliche Trendaktivität",
+    "categoryDistribution": "Kategorieverteilung"
+  },
   "footer": {
     "legal": "Rechtliches",
     "terms": "Nutzungsbedingungen",

@@ -18,6 +18,11 @@
     "language": "言語",
     "languageDesc": "MainHoursインターフェースの希望言語を選択してください"
   },
+  "trends": {
+    "topicTitle": "トレンドトピック",
+    "weeklyActivity": "週間トレンド活動",
+    "categoryDistribution": "カテゴリ分布"
+  },
   "footer": {
     "legal": "法的情報",
     "terms": "利用規約",

@@ -16,6 +16,7 @@ import Search from "./pages/Search";
 import News from "./pages/News";
 import Finance from "./pages/Finance";
 import Climate from "./pages/Climate";
+import Trends from "./pages/Trends";
 import NotFound from "./pages/NotFound";
 
 // Import i18n configuration
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/news" element={<News />} />
             <Route path="/finance" element={<Finance />} />
             <Route path="/climate" element={<Climate />} />
+            <Route path="/trends" element={<Trends />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

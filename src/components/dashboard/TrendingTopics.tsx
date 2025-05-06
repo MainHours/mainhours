@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TrendingTopic {
   id: number;
@@ -11,6 +12,8 @@ interface TrendingTopic {
 }
 
 const TrendingTopics = () => {
+  const { t } = useTranslation();
+  
   const trends: TrendingTopic[] = [
     { id: 1, topic: '#TechConference2025', count: '120K posts', category: 'Technology' },
     { id: 2, topic: 'Olympic Games', count: '95K posts', category: 'Sports' },
@@ -24,7 +27,7 @@ const TrendingTopics = () => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center">
           <TrendingUp className="h-5 w-5 mr-2" />
-          Trending Topics
+          {t('trends.topicTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -18,6 +18,11 @@
     "language": "اللغة",
     "languageDesc": "حدد لغتك المفضلة لواجهة MainHours"
   },
+  "trends": {
+    "topicTitle": "المواضيع الرائجة",
+    "weeklyActivity": "نشاط الاتجاهات الأسبوعي",
+    "categoryDistribution": "توزيع الفئات"
+  },
   "footer": {
     "legal": "قانوني",
     "terms": "شروط الخدمة",

@@ -18,6 +18,11 @@
     "language": "语言",
     "languageDesc": "选择您偏好的MainHours界面语言"
   },
+  "trends": {
+    "topicTitle": "热门话题",
+    "weeklyActivity": "每周趋势活动",
+    "categoryDistribution": "类别分布"
+  },
   "footer": {
     "legal": "法律信息",
     "terms": "服务条款",
