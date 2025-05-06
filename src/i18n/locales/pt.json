@@ -1,0 +1,30 @@
+
+{
+  "common": {
+    "welcome": "Bem-vindo ao MainHours",
+    "subtitle": "Sua plataforma tudo-em-um para redes sociais, notícias, finanças e muito mais.",
+    "search": "Pesquisar",
+    "trending": "Pesquisas em alta",
+    "news": "Notícias",
+    "academic": "Acadêmico",
+    "home": "Início",
+    "social": "Social",
+    "finance": "Finanças",
+    "climate": "Clima",
+    "trends": "Tendências"
+  },
+  "settings": {
+    "appearance": "Configurações de aparência",
+    "language": "Idioma",
+    "languageDesc": "Selecione seu idioma preferido para a interface do MainHours"
+  },
+  "footer": {
+    "legal": "Legal",
+    "terms": "Termos de serviço",
+    "privacy": "Política de privacidade",
+    "cookies": "Política de cookies",
+    "connect": "Conectar",
+    "contact": "Contate-nos",
+    "rights": "Todos os direitos reservados."
+  }
+}

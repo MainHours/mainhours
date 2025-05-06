@@ -12,9 +12,11 @@ import TrendingTopics from '@/components/dashboard/TrendingTopics';
 import WeatherWidget from '@/components/dashboard/WeatherWidget';
 import SportsUpdate from '@/components/dashboard/SportsUpdate';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,9 +29,9 @@ const Index = () => {
         )}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Welcome to MainHours</h1>
+            <h1 className="text-3xl font-bold">{t('common.welcome')}</h1>
             <p className="text-muted-foreground">
-              Your all-in-one platform for social networking, news, finance, and more.
+              {t('common.subtitle')}
             </p>
             
             {/* First row */}

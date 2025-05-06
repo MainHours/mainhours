@@ -1,0 +1,30 @@
+
+{
+  "common": {
+    "welcome": "MainHoursへようこそ",
+    "subtitle": "ソーシャルネットワーク、ニュース、金融などのオールインワンプラットフォーム。",
+    "search": "検索",
+    "trending": "トレンド検索",
+    "news": "ニュース",
+    "academic": "学術",
+    "home": "ホーム",
+    "social": "ソーシャル",
+    "finance": "金融",
+    "climate": "気候",
+    "trends": "トレンド"
+  },
+  "settings": {
+    "appearance": "外観設定",
+    "language": "言語",
+    "languageDesc": "MainHoursインターフェースの希望言語を選択してください"
+  },
+  "footer": {
+    "legal": "法的情報",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "cookies": "Cookieポリシー",
+    "connect": "接続",
+    "contact": "お問い合わせ",
+    "rights": "すべての権利を留保します。"
+  }
+}

@@ -4,40 +4,41 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Activity, Users, Search, TrendingUp, BarChart, Newspaper, Thermometer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const navItems = [
   {
-    title: "Home",
+    title: "common.home",
     href: "/",
     icon: <Activity className="h-5 w-5" />,
   },
   {
-    title: "Social",
+    title: "common.social",
     href: "/social",
     icon: <Users className="h-5 w-5" />,
   },
   {
-    title: "Search",
+    title: "common.search",
     href: "/search",
     icon: <Search className="h-5 w-5" />,
   },
   {
-    title: "News",
+    title: "common.news",
     href: "/news",
     icon: <Newspaper className="h-5 w-5" />,
   },
   {
-    title: "Finance",
+    title: "common.finance",
     href: "/finance",
     icon: <BarChart className="h-5 w-5" />,
   },
   {
-    title: "Trends",
+    title: "common.trends",
     href: "/trends",
     icon: <TrendingUp className="h-5 w-5" />,
   },
   {
-    title: "Climate",
+    title: "common.climate",
     href: "/climate",
     icon: <Thermometer className="h-5 w-5" />,
   },
@@ -49,6 +50,7 @@ interface SidebarProps {
 
 const Sidebar = ({ className }: SidebarProps) => {
   const location = useLocation();
+  const { t } = useTranslation();
   
   return (
     <div className={cn("pb-12 h-full", className)}>
@@ -68,7 +70,7 @@ const Sidebar = ({ className }: SidebarProps) => {
               >
                 <Link to={item.href}>
                   {item.icon}
-                  <span className="ml-2">{item.title}</span>
+                  <span className="ml-2">{t(item.title)}</span>
                 </Link>
               </Button>
             ))}

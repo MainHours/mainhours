@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Search, Loader2, BarChart2, Book, Newspaper } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const SearchBox = () => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
@@ -44,7 +46,7 @@ const SearchBox = () => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center gap-2">
           <Search className="h-5 w-5" />
-          MainHours Search
+          MainHours {t('common.search')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -63,10 +65,10 @@ const SearchBox = () => {
             {isSearching ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Searching...
+                {t('common.search')}...
               </>
             ) : (
-              'Search'
+              t('common.search')
             )}
           </Button>
         </form>
@@ -74,7 +76,7 @@ const SearchBox = () => {
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
             <BarChart2 className="h-4 w-4" />
-            <span>Trending searches</span>
+            <span>{t('common.trending')}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {trendingSearches.map((trend, index) => (
@@ -93,11 +95,11 @@ const SearchBox = () => {
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Newspaper className="h-4 w-4" />
-          <span>News</span>
+          <span>{t('common.news')}</span>
         </div>
         <div className="flex items-center gap-2">
           <Book className="h-4 w-4" />
-          <span>Academic</span>
+          <span>{t('common.academic')}</span>
         </div>
       </CardFooter>
     </Card>

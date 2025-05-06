@@ -2,8 +2,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const Footer = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -13,35 +15,35 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">MainHours</h3>
             <p className="text-sm text-muted-foreground">
-              Your all-in-one platform for social networking, news, finance, and more.
+              {t('common.subtitle')}
             </p>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Legal</h3>
+            <h3 className="font-semibold mb-4">{t('footer.legal')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/terms" className="text-muted-foreground hover:text-primary">
-                  Terms of Service
+                  {t('footer.terms')}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="text-muted-foreground hover:text-primary">
-                  Privacy Policy
+                  {t('footer.privacy')}
                 </Link>
               </li>
               <li>
                 <Link to="/cookies" className="text-muted-foreground hover:text-primary">
-                  Cookie Policy
+                  {t('footer.cookies')}
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Connect</h3>
+            <h3 className="font-semibold mb-4">{t('footer.connect')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/contact" className="text-muted-foreground hover:text-primary">
-                  Contact Us
+                  {t('footer.contact')}
                 </Link>
               </li>
               <li>
@@ -54,7 +56,7 @@ const Footer = () => {
         </div>
         <Separator className="my-6" />
         <div className="text-center text-sm text-muted-foreground">
-          <p>&copy; {currentYear} MainHours. All rights reserved.</p>
+          <p>&copy; {currentYear} MainHours. {t('footer.rights')}</p>
         </div>
       </div>
     </footer>

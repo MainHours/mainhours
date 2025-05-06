@@ -18,6 +18,9 @@ import Finance from "./pages/Finance";
 import Climate from "./pages/Climate";
 import NotFound from "./pages/NotFound";
 
+// Import i18n configuration
+import "./i18n/config";
+
 const queryClient = new QueryClient();
 
 const App = () => (

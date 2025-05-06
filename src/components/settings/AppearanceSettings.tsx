@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Globe } from 'lucide-react';
+import { Globe, Languages } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -18,25 +19,23 @@ const languages = [
 ];
 
 const AppearanceSettings = () => {
-  const [language, setLanguage] = useState('en');
+  const { t, changeLanguage, currentLanguage } = useTranslation();
+  const [language, setLanguage] = useState(currentLanguage || 'en');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Get stored language preference or default to 'en'
-    const storedLanguage = localStorage.getItem('language') || 'en';
+    // Get stored language preference or default to current language
+    const storedLanguage = localStorage.getItem('language') || currentLanguage || 'en';
     setLanguage(storedLanguage);
-  }, []);
+  }, [currentLanguage]);
 
   const handleLanguageChange = async (value: string) => {
     try {
       setLoading(true);
       setLanguage(value);
       
-      // Store language preference in local storage
-      localStorage.setItem('language', value);
-      
-      // In a real app, you might want to update this on the user profile in the database
-      // and apply the language change to the UI
+      // Update language in i18n and local storage
+      await changeLanguage(value);
       
       toast.success(`Language changed to ${languages.find(lang => lang.code === value)?.name}`);
     } catch (error) {
@@ -48,16 +47,16 @@ const AppearanceSettings = () => {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-semibold">Appearance Settings</h2>
+      <h2 className="text-2xl font-semibold">{t('settings.appearance')}</h2>
       
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Globe className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Language</h3>
+          <Languages className="h-5 w-5 text-muted-foreground" />
+          <h3 className="text-lg font-medium">{t('settings.language')}</h3>
         </div>
         
         <p className="text-sm text-muted-foreground">
-          Select your preferred language for the MainHours interface
+          {t('settings.languageDesc')}
         </p>
         
         <RadioGroup 

@@ -1,0 +1,30 @@
+
+{
+  "common": {
+    "welcome": "欢迎来到MainHours",
+    "subtitle": "您的社交网络、新闻、金融等一体化平台。",
+    "search": "搜索",
+    "trending": "热门搜索",
+    "news": "新闻",
+    "academic": "学术",
+    "home": "首页",
+    "social": "社交",
+    "finance": "财经",
+    "climate": "气候",
+    "trends": "趋势"
+  },
+  "settings": {
+    "appearance": "外观设置",
+    "language": "语言",
+    "languageDesc": "选择您偏好的MainHours界面语言"
+  },
+  "footer": {
+    "legal": "法律信息",
+    "terms": "服务条款",
+    "privacy": "隐私政策",
+    "cookies": "Cookie政策",
+    "connect": "联系我们",
+    "contact": "联系我们",
+    "rights": "版权所有。"
+  }
+}
