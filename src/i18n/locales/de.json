@@ -41,6 +41,7 @@
     "autoRefresh": "Automatisch aktualisieren",
     "refreshInterval": "Aktualisierungsintervall",
     "lastUpdated": "Letzte Aktualisierung",
-    "noMoreNews": "Keine weiteren Nachrichten"
+    "noMoreNews": "Keine weiteren Nachrichten",
+    "news": "Nachrichten"
   }
 }

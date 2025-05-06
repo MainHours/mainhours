@@ -41,6 +41,7 @@
     "autoRefresh": "Auto refresh",
     "refreshInterval": "Refresh interval",
     "lastUpdated": "Last updated",
-    "noMoreNews": "No more news to load"
+    "noMoreNews": "No more news to load",
+    "news": "News"
   }
 }

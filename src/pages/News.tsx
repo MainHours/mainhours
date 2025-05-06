@@ -4,8 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import NewsCard from '@/components/dashboard/NewsCard';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -16,11 +15,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
-import { RefreshCw, AlertCircle, Clock } from 'lucide-react';
+import { RefreshCw, Clock } from 'lucide-react';
+import FeaturedNewsSection from '@/components/dashboard/FeaturedNewsSection';
+import BreakingNewsSection from '@/components/dashboard/BreakingNewsSection';
+import NewsByCategory from '@/components/dashboard/NewsByCategory';
 
 interface NewsArticle {
   title: string;
@@ -110,6 +111,17 @@ const News = () => {
     }).format(date);
   };
   
+  // Get unique categories from articles
+  const getUniqueCategories = () => {
+    const categories = articles.map(article => article.category.toLowerCase());
+    return [...new Set(categories)];
+  };
+  
+  // Get breaking news articles
+  const getBreakingNewsArticles = () => {
+    return articles.filter(article => article.isBreaking);
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -188,11 +200,9 @@ const News = () => {
                       <div className="col-span-full md:col-span-2">
                         <Card>
                           <div className="h-80 bg-muted rounded-t-lg" />
-                          <CardHeader>
-                            <Skeleton className="h-4 w-32 mb-2" />
-                            <Skeleton className="h-6 w-full mb-4" />
-                          </CardHeader>
                           <CardContent>
+                            <Skeleton className="h-4 w-32 mb-2 mt-4" />
+                            <Skeleton className="h-6 w-full mb-4" />
                             <Skeleton className="h-4 w-full mb-2" />
                             <Skeleton className="h-4 w-full mb-2" />
                             <Skeleton className="h-4 w-3/4" />
@@ -201,11 +211,9 @@ const News = () => {
                       </div>
                       <div className="col-span-full md:col-span-1">
                         <Card>
-                          <CardHeader>
+                          <CardContent className="space-y-4 p-4">
                             <Skeleton className="h-5 w-32 mb-2" />
                             <Skeleton className="h-4 w-24" />
-                          </CardHeader>
-                          <CardContent className="space-y-4">
                             {[1, 2].map((_, i) => (
                               <div key={i} className="border-b pb-4">
                                 <Skeleton className="h-3 w-16 mb-1" />
@@ -220,12 +228,10 @@ const News = () => {
                       {[1, 2, 3, 4, 5, 6].map((i) => (
                         <Card key={i} className="overflow-hidden">
                           <div className="h-40 bg-muted" />
-                          <CardHeader>
-                            <Skeleton className="h-4 w-32 mb-2" />
-                            <Skeleton className="h-5 w-full" />
-                          </CardHeader>
                           <CardContent>
-                            <Skeleton className="h-4 w-full mb-2" />
+                            <Skeleton className="h-4 w-32 mb-2 mt-4" />
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-4 w-full mb-2 mt-2" />
                             <Skeleton className="h-4 w-3/4" />
                           </CardContent>
                         </Card>
@@ -234,107 +240,32 @@ const News = () => {
                   </>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {featuredNews && (
-                        <div className="col-span-full md:col-span-2">
-                          <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                            <div className="relative h-80">
-                              <img 
-                                src={featuredNews.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmV3c3xlbnwwfHwwfHx8MA%3D%3D'} 
-                                alt={featuredNews.title}
-                                className="object-cover w-full h-full"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmV3c3xlbnwwfHwwfHx8MA%3D%3D';
-                                }}
-                              />
-                              {featuredNews.isBreaking && (
-                                <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-md flex items-center text-sm font-bold animate-pulse">
-                                  <AlertCircle className="h-4 w-4 mr-1" />
-                                  {t('news.breakingNews')}
-                                </div>
-                              )}
-                            </div>
-                            <CardHeader>
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center">
-                                  <Badge variant="secondary" className="bg-mainhours-red text-white">
-                                    {featuredNews.category}
-                                  </Badge>
-                                  <span className="ml-2 text-sm text-muted-foreground">
-                                    {featuredNews.source}
-                                  </span>
-                                </div>
-                                <span className="text-sm text-muted-foreground flex items-center">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  {featuredNews.time}
-                                </span>
-                              </div>
-                              <CardTitle className="text-2xl">{featuredNews.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <p className="text-muted-foreground">{featuredNews.description}</p>
-                              <div className="mt-4">
-                                {featuredNews.url ? (
-                                  <a 
-                                    href={featuredNews.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-mainhours-purple hover:underline"
-                                  >
-                                    {t('news.readMore')}
-                                  </a>
-                                ) : (
-                                  <span className="text-muted-foreground">No link available</span>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                      <div className="col-span-full md:col-span-2">
+                        <FeaturedNewsSection featuredNews={featuredNews} />
+                      </div>
                       
                       <div className="col-span-full md:col-span-1 space-y-6">
-                        <Card className="border-t-4 border-t-red-500">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center text-red-500">
-                              <AlertCircle className="h-4 w-4 mr-2" /> 
-                              {t('news.breakingNews')}
-                            </CardTitle>
-                            <CardDescription>{t('news.justIn')}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            {articles.filter(a => a.isBreaking).slice(0, 3).map((article, index) => (
-                              <div key={index} className="border-b pb-4 last:border-0">
-                                <div className="flex items-center justify-between mb-1">
-                                  <Badge variant="outline" className="text-xs">{article.category}</Badge>
-                                  <p className="text-xs text-muted-foreground">{article.time}</p>
-                                </div>
-                                <h3 className="font-medium hover:text-mainhours-purple">
-                                  {article.url ? (
-                                    <a 
-                                      href={article.url} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                    >
-                                      {article.title}
-                                    </a>
-                                  ) : article.title}
-                                </h3>
-                              </div>
-                            ))}
-                          </CardContent>
-                        </Card>
+                        <BreakingNewsSection breakingNewsArticles={getBreakingNewsArticles()} />
                       </div>
                     </div>
                     
-                    <h2 className="text-2xl font-bold mt-8 mb-6">{activeTab === 'general' ? t('news.topStories') : activeTab.charAt(0).toUpperCase() + activeTab.slice(1) + ' News'}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {articles.slice(2).map((article, index) => (
-                        <div key={index}>
-                          <NewsCard {...article} />
-                        </div>
-                      ))}
-                    </div>
+                    {/* Display news organized by categories */}
+                    {getUniqueCategories().map((category) => (
+                      <NewsByCategory 
+                        key={category} 
+                        category={category} 
+                        articles={articles}
+                      />
+                    ))}
+                    
+                    {articles.length === 0 && (
+                      <div className="text-center py-10">
+                        <p className="text-muted-foreground">
+                          {t('news.noMoreNews')}
+                        </p>
+                      </div>
+                    )}
                   </>
                 )}
               </TabsContent>
