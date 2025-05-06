@@ -31,5 +31,16 @@
     "connect": "Connect",
     "contact": "Contact Us",
     "rights": "All rights reserved."
+  },
+  "news": {
+    "realTimeUpdates": "Real-Time Updates",
+    "breakingNews": "Breaking News",
+    "justIn": "Just In",
+    "topStories": "Top Stories",
+    "readMore": "Read full article",
+    "autoRefresh": "Auto refresh",
+    "refreshInterval": "Refresh interval",
+    "lastUpdated": "Last updated",
+    "noMoreNews": "No more news to load"
   }
 }

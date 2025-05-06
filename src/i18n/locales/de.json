@@ -31,5 +31,16 @@
     "connect": "Verbinden",
     "contact": "Kontaktieren Sie uns",
     "rights": "Alle Rechte vorbehalten."
+  },
+  "news": {
+    "realTimeUpdates": "Echtzeit-Updates",
+    "breakingNews": "Eilmeldungen",
+    "justIn": "Gerade eingetroffen",
+    "topStories": "Topthemen",
+    "readMore": "Vollständigen Artikel lesen",
+    "autoRefresh": "Automatisch aktualisieren",
+    "refreshInterval": "Aktualisierungsintervall",
+    "lastUpdated": "Letzte Aktualisierung",
+    "noMoreNews": "Keine weiteren Nachrichten"
   }
 }
