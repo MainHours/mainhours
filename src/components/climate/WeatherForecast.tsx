@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from '@/hooks/useTranslation';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { CloudSun, Droplets, Wind } from 'lucide-react';
+import { CloudSun, Droplets, Wind, Thermometer } from 'lucide-react';
 
 const WeatherForecast = () => {
   const { t } = useTranslation();
