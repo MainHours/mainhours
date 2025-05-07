@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -99,7 +100,8 @@ const WeatherForecast = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="h-[300px]">
+          {/* Fixed height container to prevent overlapping */}
+          <div className="h-[280px] w-full overflow-hidden">
             <ChartContainer
               config={chartConfig}
             >
@@ -203,7 +205,7 @@ const WeatherForecast = () => {
             </ChartContainer>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             {(forecastType === 'daily' ? dailyData : hourlyData).slice(0, 4).map((item, index) => (
               <Card key={index} className="bg-background/50">
                 <CardContent className="p-4 text-center">
