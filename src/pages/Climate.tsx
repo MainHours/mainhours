@@ -1,9 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import CitySearch from '@/components/climate/CitySearch';
 import CityWeatherCard from '@/components/climate/CityWeatherCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from '@/hooks/useTranslation';
+import WeatherWidget from '@/components/dashboard/WeatherWidget';
+import WeatherForecast from '@/components/climate/WeatherForecast';
+import WeatherMap from '@/components/climate/WeatherMap';
 
 // Define the city weather data type
 export interface CityWeather {
@@ -19,7 +24,9 @@ export interface CityWeather {
 }
 
 const Climate = () => {
+  const { t } = useTranslation();
   const [searchResults, setSearchResults] = useState<CityWeather[]>([]);
+  const [activeTab, setActiveTab] = useState('current');
   
   // Main cities with their weather data (simulated)
   const mainCities: CityWeather[] = [
@@ -99,13 +106,15 @@ const Climate = () => {
   return (
     <Layout>
       <div className="container mx-auto py-6 space-y-6">
-        <h1 className="text-3xl font-bold">Climate Information</h1>
+        <h1 className="text-3xl font-bold">{t('climate.title')}</h1>
         
+        <WeatherWidget />
+
         <CitySearch onSearchResults={handleSearchResults} />
         
         {searchResults.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Search Results</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('climate.searchResults')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {searchResults.map((city) => (
                 <CityWeatherCard key={city.id} city={city} />
@@ -114,18 +123,36 @@ const Climate = () => {
           </div>
         )}
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Major Cities Weather</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mainCities.map((city) => (
-                <CityWeatherCard key={city.id} city={city} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="current">{t('climate.majorCities')}</TabsTrigger>
+            <TabsTrigger value="forecast">{t('climate.forecast')}</TabsTrigger>
+            <TabsTrigger value="map">{t('climate.map')}</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="current">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">{t('climate.majorCities')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mainCities.map((city) => (
+                    <CityWeatherCard key={city.id} city={city} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="forecast">
+            <WeatherForecast />
+          </TabsContent>
+          
+          <TabsContent value="map">
+            <WeatherMap />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
