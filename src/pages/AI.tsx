@@ -105,7 +105,7 @@ const AI = () => {
                 {messages.map((message, index) => <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`flex gap-3 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                       <Avatar className="h-10 w-10">
-                        {message.sender === 'ai' ? <AvatarImage alt="AI" src="/lovable-uploads/13ed5c66-9ee7-4952-9526-9cf2b2e48aad.png" className="object-fill" /> : <AvatarImage src="https://github.com/shadcn.png" alt="User" />}
+                        {message.sender === 'ai' ? <AvatarImage alt="AI" className="object-fill" src="https://sdmntprwestus.oaiusercontent.com/files/00000000-9114-6230-9c4d-3f36ac8ee588/raw?se=2025-05-07T22%3A52%3A33Z&sp=r&sv=2024-08-04&sr=b&scid=00000000-0000-0000-0000-000000000000&skoid=e9d2f8b1-028a-4cff-8eb1-d0e66fbefcca&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-07T21%3A18%3A56Z&ske=2025-05-08T21%3A18%3A56Z&sks=b&skv=2024-08-04&sig=wxK0DVGSlzJdnetZCi2OMMgndIsZE/2x3gm4ymexjXw%3D" /> : <AvatarImage src="https://github.com/shadcn.png" alt="User" />}
                         <AvatarFallback>
                           {message.sender === 'ai' ? 'AI' : 'U'}
                         </AvatarFallback>
