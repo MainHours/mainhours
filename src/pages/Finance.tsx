@@ -1,17 +1,26 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, BarChart } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart, Search, ChartLine, DollarSign, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { toast } from 'sonner';
+import { ChartContainer, ChartTooltipContent, ChartTooltip } from '@/components/ui/chart';
 
 const Finance = () => {
   const isMobile = useIsMobile();
-  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [activeTab, setActiveTab] = useState('all');
+
   const stockData = [
     { symbol: 'AAPL', name: 'Apple Inc.', price: 181.42, change: 0.85, marketCap: '2.85T' },
     { symbol: 'MSFT', name: 'Microsoft Corp.', price: 416.78, change: -0.32, marketCap: '3.10T' },
@@ -56,8 +65,55 @@ const Finance = () => {
     }
   ];
 
+  const chartConfig = {
+    AAPL: { label: "Apple", theme: { light: "#8884d8", dark: "#a78bfa" } },
+    MSFT: { label: "Microsoft", theme: { light: "#82ca9d", dark: "#4ade80" } },
+    GOOGL: { label: "Google", theme: { light: "#ffc658", dark: "#facc15" } },
+  };
+
+  // Function to handle stock search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    
+    if (searchQuery.trim()) {
+      setIsLoading(true);
+      
+      // Simulate API call with timeout
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success(`Stock data for "${searchQuery}" loaded`);
+      }, 1000);
+    }
+  };
+
+  // Function to refresh data
+  const refreshData = () => {
+    setIsLoading(true);
+    
+    // Simulate data refresh
+    setTimeout(() => {
+      setLastUpdated(new Date());
+      setIsLoading(false);
+      toast.success("Market data refreshed");
+    }, 1000);
+  };
+
+  // Auto-update effect (simulated)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLastUpdated(new Date());
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredStocks = stockData.filter(stock => 
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    stock.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="flex-1 flex">
         {!isMobile && (
@@ -67,169 +123,253 @@ const Finance = () => {
         )}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-              <h1 className="text-3xl font-bold">Finance</h1>
-              <div className="mt-2 md:mt-0 flex items-center">
-                <Badge className="mr-2">MSN Money</Badge>
-                <p className="text-sm text-muted-foreground">Last updated: April 25, 2025, 2:30 PM</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold">Finance</h1>
+                <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                  <Badge className="mr-2 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900 dark:text-blue-100">MSN Money</Badge>
+                  <span className="flex items-center">
+                    <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 ml-1" 
+                      onClick={refreshData}
+                      disabled={isLoading}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </span>
+                </div>
               </div>
+              
+              <form onSubmit={handleSearch} className="mt-4 md:mt-0 flex">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search stocks..."
+                    className="pl-8 pr-4 w-full md:w-[200px]"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="ml-2" disabled={isLoading}>
+                  {isLoading ? 'Loading...' : 'Search'}
+                </Button>
+              </form>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <Card className="col-span-full md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Market Overview</CardTitle>
-                  <CardDescription>Year-to-date performance of top stocks</CardDescription>
+              <Card className="col-span-full md:col-span-2 bg-white dark:bg-gray-800 shadow-sm border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">Market Overview</CardTitle>
+                      <CardDescription>Year-to-date performance of top stocks</CardDescription>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200">YTD</Badge>
+                      <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1D</Badge>
+                      <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1M</Badge>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig} className="h-full">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.4} />
+                      <XAxis
+                        dataKey="name"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={{ stroke: "var(--border)" }}
+                      />
+                      <YAxis
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={{ stroke: "var(--border)" }}
+                        tickFormatter={(value) => `$${value}`}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                       <Legend />
-                      <Line type="monotone" dataKey="AAPL" stroke="#8884d8" activeDot={{ r: 8 }} />
-                      <Line type="monotone" dataKey="MSFT" stroke="#82ca9d" />
-                      <Line type="monotone" dataKey="GOOGL" stroke="#ffc658" />
+                      <Line
+                        type="monotone"
+                        dataKey="AAPL"
+                        strokeWidth={2}
+                        stroke="var(--color-AAPL)"
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="MSFT"
+                        strokeWidth={2}
+                        stroke="var(--color-MSFT)"
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="GOOGL"
+                        strokeWidth={2}
+                        stroke="var(--color-GOOGL)"
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
                 <CardHeader>
-                  <CardTitle>Market News</CardTitle>
+                  <CardTitle className="flex items-center text-lg">
+                    <ChartLine className="h-5 w-5 mr-2 text-blue-600" /> 
+                    Market News
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {marketNews.map((news, index) => (
                       <div key={index} className={index < marketNews.length - 1 ? "border-b pb-4" : ""}>
-                        <h3 className="font-medium">{news.title}</h3>
+                        <h3 className="font-medium hover:text-blue-600 cursor-pointer">{news.title}</h3>
                         <p className="text-sm text-muted-foreground mb-1">{news.description}</p>
                         <p className="text-xs text-muted-foreground">{news.time}</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
+                <CardFooter className="pt-0">
+                  <Button variant="link" className="ml-auto px-0 text-blue-600">
+                    More news
+                  </Button>
+                </CardFooter>
               </Card>
             </div>
             
-            <Card className="mb-8">
+            <Card className="mb-8 bg-white dark:bg-gray-800 shadow-sm border-0">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart className="h-5 w-5 mr-2" /> 
+                <CardTitle className="flex items-center text-xl">
+                  <DollarSign className="h-5 w-5 mr-2 text-green-600" /> 
                   Stock Market
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="all" className="w-full">
-                  <TabsList>
+                <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="mb-4 bg-gray-100 dark:bg-gray-800">
                     <TabsTrigger value="all">All Stocks</TabsTrigger>
                     <TabsTrigger value="tech">Technology</TabsTrigger>
                     <TabsTrigger value="healthcare">Healthcare</TabsTrigger>
                     <TabsTrigger value="consumer">Consumer</TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="all" className="mt-4">
+                  <TabsContent value="all" className="mt-0 p-0">
                     <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-2 font-medium text-muted-foreground">Symbol</th>
-                            <th className="text-left py-2 font-medium text-muted-foreground">Company</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Price</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Change</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Market Cap</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {stockData.map((stock) => (
-                            <tr key={stock.symbol} className="border-b">
-                              <td className="py-2 font-medium">{stock.symbol}</td>
-                              <td className="py-2 text-sm">{stock.name}</td>
-                              <td className="py-2 text-right">${stock.price.toFixed(2)}</td>
-                              <td className={`py-2 text-right ${
+                      <Table>
+                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
+                          <TableRow>
+                            <TableHead className="w-[100px]">Symbol</TableHead>
+                            <TableHead>Company</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Change</TableHead>
+                            <TableHead className="text-right">Market Cap</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredStocks.map((stock) => (
+                            <TableRow key={stock.symbol} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <TableCell className="font-medium">{stock.symbol}</TableCell>
+                              <TableCell>{stock.name}</TableCell>
+                              <TableCell className="text-right">${stock.price.toFixed(2)}</TableCell>
+                              <TableCell className={`text-right ${
                                 stock.change > 0 ? 'text-green-600' : 'text-red-600'
                               }`}>
                                 <div className="flex items-center justify-end">
                                   {stock.change > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                                   {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)}%
                                 </div>
-                              </td>
-                              <td className="py-2 text-right">{stock.marketCap}</td>
-                            </tr>
+                              </TableCell>
+                              <TableCell className="text-right">{stock.marketCap}</TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                      </table>
+                          {filteredStocks.length === 0 && searchQuery && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                                No stocks found matching "{searchQuery}"
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="tech" className="mt-4">
+                  <TabsContent value="tech" className="mt-0 p-0">
                     <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-2 font-medium text-muted-foreground">Symbol</th>
-                            <th className="text-left py-2 font-medium text-muted-foreground">Company</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Price</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Change</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Market Cap</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                      <Table>
+                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
+                          <TableRow>
+                            <TableHead className="w-[100px]">Symbol</TableHead>
+                            <TableHead>Company</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Change</TableHead>
+                            <TableHead className="text-right">Market Cap</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                           {stockData.slice(0, 5).map((stock) => (
-                            <tr key={stock.symbol} className="border-b">
-                              <td className="py-2 font-medium">{stock.symbol}</td>
-                              <td className="py-2 text-sm">{stock.name}</td>
-                              <td className="py-2 text-right">${stock.price.toFixed(2)}</td>
-                              <td className={`py-2 text-right ${
+                            <TableRow key={stock.symbol} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <TableCell className="font-medium">{stock.symbol}</TableCell>
+                              <TableCell>{stock.name}</TableCell>
+                              <TableCell className="text-right">${stock.price.toFixed(2)}</TableCell>
+                              <TableCell className={`text-right ${
                                 stock.change > 0 ? 'text-green-600' : 'text-red-600'
                               }`}>
                                 <div className="flex items-center justify-end">
                                   {stock.change > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                                   {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)}%
                                 </div>
-                              </td>
-                              <td className="py-2 text-right">{stock.marketCap}</td>
-                            </tr>
+                              </TableCell>
+                              <TableCell className="text-right">{stock.marketCap}</TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                      </table>
+                        </TableBody>
+                      </Table>
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="healthcare" className="mt-4">
+                  <TabsContent value="healthcare" className="mt-0 p-0">
                     <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-2 font-medium text-muted-foreground">Symbol</th>
-                            <th className="text-left py-2 font-medium text-muted-foreground">Company</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Price</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Change</th>
-                            <th className="text-right py-2 font-medium text-muted-foreground">Market Cap</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b">
-                            <td className="py-2 font-medium">JNJ</td>
-                            <td className="py-2 text-sm">Johnson & Johnson</td>
-                            <td className="py-2 text-right">$148.90</td>
-                            <td className="py-2 text-right text-green-600">
+                      <Table>
+                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
+                          <TableRow>
+                            <TableHead className="w-[100px]">Symbol</TableHead>
+                            <TableHead>Company</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Change</TableHead>
+                            <TableHead className="text-right">Market Cap</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <TableCell className="font-medium">JNJ</TableCell>
+                            <TableCell>Johnson & Johnson</TableCell>
+                            <TableCell className="text-right">$148.90</TableCell>
+                            <TableCell className="text-right text-green-600">
                               <div className="flex items-center justify-end">
                                 <TrendingUp className="h-3 w-3 mr-1" />
                                 +0.21%
                               </div>
-                            </td>
-                            <td className="py-2 text-right">358.1B</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                            </TableCell>
+                            <TableCell className="text-right">358.1B</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="consumer" className="mt-4">
+                  <TabsContent value="consumer" className="mt-0 p-0">
                     <div className="text-center py-12">
                       <h3 className="text-xl font-medium">Consumer Sector Data Coming Soon</h3>
                       <p className="text-muted-foreground">We're working on adding this data!</p>
