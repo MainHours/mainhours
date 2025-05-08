@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MessageSquare, Activity, Settings } from 'lucide-react';
+import { Search, MessageSquare, Activity, Settings, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,16 +9,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useTheme } from '@/hooks/useTheme';
+import { Toggle } from '@/components/ui/toggle';
+
 const Navbar = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
+  const { theme, setTheme } = useTheme();
+
   const handleLogout = async () => {
-    const {
-      error
-    } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     } else {
@@ -25,6 +27,7 @@ const Navbar = () => {
       navigate('/');
     }
   };
+
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -32,6 +35,11 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
@@ -57,6 +65,21 @@ const Navbar = () => {
               <span className="sr-only">Search</span>
             </Link>
           </Button>
+
+          <Toggle 
+            aria-label="Toggle theme" 
+            pressed={theme === 'dark'} 
+            onPressedChange={toggleTheme}
+            className="border-0"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Toggle>
+
           <Button variant="ghost" size="icon" asChild>
             <Link to="/messages">
               <MessageSquare className="h-5 w-5" />
