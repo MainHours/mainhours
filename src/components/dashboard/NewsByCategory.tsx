@@ -3,17 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NewsCard from '@/components/dashboard/NewsCard';
 import { useTranslation } from '@/hooks/useTranslation';
-
-interface NewsArticle {
-  title: string;
-  description: string;
-  source: string;
-  category: string;
-  imageUrl: string;
-  time: string;
-  url?: string;
-  isBreaking?: boolean;
-}
+import { NewsArticle } from '@/types/news';
 
 interface NewsByCategoryProps {
   articles: NewsArticle[];
@@ -34,10 +24,12 @@ const NewsByCategory = ({ articles, category }: NewsByCategoryProps) => {
   
   return (
     <div className="mb-10">
-      <h2 className="text-2xl font-bold mb-6">{category.charAt(0).toUpperCase() + category.slice(1)} {t('news.news')}</h2>
+      <h2 className="text-2xl font-bold mb-6 border-l-4 border-mainhours-purple pl-3">
+        {category.charAt(0).toUpperCase() + category.slice(1)} {t('news.news')}
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categoryArticles.map((article, index) => (
-          <div key={index}>
+          <div key={index} className="transform transition-transform hover:-translate-y-1">
             <NewsCard {...article} />
           </div>
         ))}
