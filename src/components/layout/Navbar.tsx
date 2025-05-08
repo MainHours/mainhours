@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Activity, Settings, Moon, Sun } from 'lucide-react';
+import { Search, Activity, Settings, Moon, Sun, Newspaper, Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,7 +47,7 @@ const Navbar = () => {
             <div className="rounded-full bg-gray-100 p-1">
               <img alt="MainHours Logo" className="h-8 w-8 rounded-full object-contain" src="/lovable-uploads/4283fea3-4d2c-4467-9f16-45e66c714d6a.png" />
             </div>
-            <span className="ml-2 text-xl font-bold text-black">MainHours</span>
+            <span className="ml-2 text-xl font-bold text-black dark:text-white">MainHours</span>
           </Link>
         </div>
         
@@ -63,6 +63,13 @@ const Navbar = () => {
             <Link to="/search">
               <Search className="h-5 w-5 md:hidden" />
               <span className="sr-only">Search</span>
+            </Link>
+          </Button>
+
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/news">
+              <Newspaper className="h-5 w-5" />
+              <span className="sr-only">News</span>
             </Link>
           </Button>
 
