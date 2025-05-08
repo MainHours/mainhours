@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MessageSquare, Activity, Settings, Moon, Sun } from 'lucide-react';
+import { Search, Activity, Settings, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,12 +80,6 @@ const Navbar = () => {
             <span className="sr-only">Toggle theme</span>
           </Toggle>
 
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/messages">
-              <MessageSquare className="h-5 w-5" />
-              <span className="sr-only">Messages</span>
-            </Link>
-          </Button>
           <Button variant="outline" asChild className="hidden md:flex">
             <Link to="/ai">
               <span>AI Assistant</span>
