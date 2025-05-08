@@ -39,12 +39,12 @@ const News = () => {
   const { t } = useTranslation();
   const [newsSources, setNewsSources] = useState<NewsSource[]>([
     { id: 'bbc', name: 'BBC', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png' },
-    { id: 'nbc', name: 'NBC News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/NBC_logo.svg/1200px-NBC_logo.svg.png' },
+    { id: 'nbc', name: 'NBC News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/NBC_News_2011.svg/1200px-NBC_News_2011.svg.png' },
     { id: 'nyt', name: 'New York Times', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/NewYorkTimes.svg/1200px-NewYorkTimes.svg.png' },
     { id: 'cnn', name: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png' },
     { id: 'fox', name: 'Fox News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/1200px-Fox_News_Channel_logo.svg.png' },
     { id: 'wapo', name: 'Washington Post', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/The_Logo_of_The_Washington_Post_Newspaper.svg/1200px-The_Logo_of_The_Washington_Post_Newspaper.svg.png' },
-    { id: 'reuters', name: 'Reuters', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Reuters_logo.svg/1200px-Reuters_logo.svg.png' },
+    { id: 'reuters', name: 'Reuters', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Reuters_2008_logo.svg/1200px-Reuters_2008_logo.svg.png' },
     { id: 'guardian', name: 'The Guardian', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/The_Guardian_2018.svg/1200px-The_Guardian_2018.svg.png' },
   ]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
