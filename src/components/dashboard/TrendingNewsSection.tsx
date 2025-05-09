@@ -22,7 +22,7 @@ const TrendingNewsSection = ({ trendingArticles }: TrendingNewsSectionProps) => 
     if (sourceLower.includes('bbc')) {
       return 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png';
     } else if (sourceLower.includes('nbc')) {
-      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/NBC_News_2011.svg/1200px-NBC_News_2011.svg.png';
+      return '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png';
     } else if (sourceLower.includes('new york times') || sourceLower.includes('nyt')) {
       return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/NewYorkTimes.svg/1200px-NewYorkTimes.svg.png';
     } else if (sourceLower.includes('cnn')) {

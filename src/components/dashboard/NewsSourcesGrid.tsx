@@ -10,6 +10,17 @@ interface NewsSourcesGridProps {
 }
 
 const NewsSourcesGrid = ({ sources, selectedSourceId, onSourceSelect }: NewsSourcesGridProps) => {
+  // Update the sources array with the new NBC logo if it exists
+  const updatedSources = sources.map(source => {
+    if (source.id === 'nbc') {
+      return {
+        ...source,
+        logo: '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png'
+      };
+    }
+    return source;
+  });
+
   return (
     <div className="mb-6">
       <ScrollArea className="w-full whitespace-nowrap">
@@ -21,7 +32,7 @@ const NewsSourcesGrid = ({ sources, selectedSourceId, onSourceSelect }: NewsSour
             <span className="text-sm font-medium">All Sources</span>
           </div>
 
-          {sources.map((source) => (
+          {updatedSources.map((source) => (
             <div 
               key={source.id}
               className={`shrink-0 cursor-pointer flex items-center justify-center w-24 h-16 rounded-md border-2 ${selectedSourceId === source.id ? 'border-mainhours-purple bg-mainhours-purple/10' : 'border-gray-200 hover:border-mainhours-purple/50 dark:border-gray-700'}`}

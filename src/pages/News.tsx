@@ -39,7 +39,7 @@ const News = () => {
   const { t } = useTranslation();
   const [newsSources, setNewsSources] = useState<NewsSource[]>([
     { id: 'bbc', name: 'BBC', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png' },
-    { id: 'nbc', name: 'NBC News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/NBC_News_2011.svg/1200px-NBC_News_2011.svg.png' },
+    { id: 'nbc', name: 'NBC News', logo: '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png' },
     { id: 'nyt', name: 'New York Times', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/NewYorkTimes.svg/1200px-NewYorkTimes.svg.png' },
     { id: 'cnn', name: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png' },
     { id: 'fox', name: 'Fox News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/1200px-Fox_News_Channel_logo.svg.png' },
