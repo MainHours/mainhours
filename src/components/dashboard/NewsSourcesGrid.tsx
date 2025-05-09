@@ -10,12 +10,17 @@ interface NewsSourcesGridProps {
 }
 
 const NewsSourcesGrid = ({ sources, selectedSourceId, onSourceSelect }: NewsSourcesGridProps) => {
-  // Update the sources array with the new NBC logo if it exists
+  // Update the sources array with the new logos
   const updatedSources = sources.map(source => {
     if (source.id === 'nbc') {
       return {
         ...source,
         logo: '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png'
+      };
+    } else if (source.id === 'reuters') {
+      return {
+        ...source,
+        logo: '/lovable-uploads/d1f13521-e392-4bc7-abbc-b7e96474c2e0.png'
       };
     }
     return source;

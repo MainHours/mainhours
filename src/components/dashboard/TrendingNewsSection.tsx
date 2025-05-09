@@ -32,7 +32,7 @@ const TrendingNewsSection = ({ trendingArticles }: TrendingNewsSectionProps) => 
     } else if (sourceLower.includes('washington') || sourceLower.includes('wapo')) {
       return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/The_Logo_of_The_Washington_Post_Newspaper.svg/1200px-The_Logo_of_The_Washington_Post_Newspaper.svg.png';
     } else if (sourceLower.includes('reuters')) {
-      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Reuters_2008_logo.svg/1200px-Reuters_2008_logo.svg.png';
+      return '/lovable-uploads/d1f13521-e392-4bc7-abbc-b7e96474c2e0.png';
     } else if (sourceLower.includes('guardian')) {
       return 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/The_Guardian_2018.svg/1200px-The_Guardian_2018.svg.png';
     }

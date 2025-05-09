@@ -44,7 +44,7 @@ const News = () => {
     { id: 'cnn', name: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png' },
     { id: 'fox', name: 'Fox News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/1200px-Fox_News_Channel_logo.svg.png' },
     { id: 'wapo', name: 'Washington Post', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/The_Logo_of_The_Washington_Post_Newspaper.svg/1200px-The_Logo_of_The_Washington_Post_Newspaper.svg.png' },
-    { id: 'reuters', name: 'Reuters', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Reuters_2008_logo.svg/1200px-Reuters_2008_logo.svg.png' },
+    { id: 'reuters', name: 'Reuters', logo: '/lovable-uploads/d1f13521-e392-4bc7-abbc-b7e96474c2e0.png' },
     { id: 'guardian', name: 'The Guardian', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/The_Guardian_2018.svg/1200px-The_Guardian_2018.svg.png' },
   ]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
