@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Activity, Settings, Moon, Sun, Newspaper, Bell } from 'lucide-react';
@@ -11,15 +10,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from '@/hooks/useTheme';
 import { Toggle } from '@/components/ui/toggle';
-
 const Navbar = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
-  const { theme, setTheme } = useTheme();
-
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     } else {
@@ -27,7 +31,6 @@ const Navbar = () => {
       navigate('/');
     }
   };
-
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -35,17 +38,15 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
-
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
-
   return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <div className="rounded-full bg-gray-100 p-1">
-              <img alt="MainHours Logo" className="h-8 w-8 rounded-full object-contain" src="/lovable-uploads/4283fea3-4d2c-4467-9f16-45e66c714d6a.png" />
+              <img alt="MainHours Logo" className="h-8 w-8 rounded-full object-contain" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" />
             </div>
             <span className="ml-2 text-xl font-bold text-black dark:text-white">MainHours</span>
           </Link>
@@ -73,17 +74,8 @@ const Navbar = () => {
             </Link>
           </Button>
 
-          <Toggle 
-            aria-label="Toggle theme" 
-            pressed={theme === 'dark'} 
-            onPressedChange={toggleTheme}
-            className="border-0"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+          <Toggle aria-label="Toggle theme" pressed={theme === 'dark'} onPressedChange={toggleTheme} className="border-0">
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             <span className="sr-only">Toggle theme</span>
           </Toggle>
 
