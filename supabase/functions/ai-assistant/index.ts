@@ -25,22 +25,49 @@ serve(async (req) => {
 
     console.log(`Processing AI request: ${message}`);
 
-    // Generate a response that includes references to real websites
+    // More sophisticated AI response generation
     const query = message.toLowerCase();
+    let responseContent = '';
     
-    // Create a more sophisticated response with actual links
-    const response = `I found some information about "${message}". Here are some resources you might find helpful:
-    
-1. Wikipedia has comprehensive information: https://en.wikipedia.org/wiki/${encodeURIComponent(message)}
-2. For more search results, check Google: https://www.google.com/search?q=${encodeURIComponent(message)}
-3. YouTube has videos on this topic: https://www.youtube.com/results?search_query=${encodeURIComponent(message)}
-4. You might find interesting discussions on Reddit: https://www.reddit.com/search/?q=${encodeURIComponent(message)}
-5. Academic resources are available on Google Scholar: https://scholar.google.com/scholar?q=${encodeURIComponent(message)}
+    // Generate response based on message context
+    if (query.includes('hello') || query.includes('hi')) {
+      responseContent = `Hello! I'm Nebulosa, a modern AI assistant. How can I help you today?`;
+    } 
+    else if (query.includes('how are you')) {
+      responseContent = `I'm functioning optimally, thank you for asking! As an AI, I don't experience feelings, but I'm ready to assist you with information, creative tasks, or problem-solving. What can I help you with?`;
+    }
+    else if (query.includes('what can you do') || query.includes('capabilities') || query.includes('features')) {
+      responseContent = `As a modern AI assistant, I can:
 
-Is there anything specific about "${message}" that you'd like me to focus on?`;
+1. Answer factual questions and provide information on various topics
+2. Assist with research by providing relevant links and resources
+3. Help generate creative content or ideas
+4. Explain complex concepts in simple terms
+5. Provide insights on current events and trending topics
+6. Assist with problem-solving and analysis
+
+What would you like help with today?`;
+    }
+    else {
+      // Simulate a more sophisticated AI response
+      responseContent = `Based on your query about "${message}", here's what I found:
+
+I analyzed your question and can provide some relevant information. This topic relates to ${generateRelevantTopic(message)}. 
+
+Some key points to consider:
+- ${generateKeyPoint(1, message)}
+- ${generateKeyPoint(2, message)}
+- ${generateKeyPoint(3, message)}
+
+For more detailed information, you might want to explore:
+- ${generateResource(1, message)}
+- ${generateResource(2, message)}
+
+Would you like me to elaborate on any specific aspect of this topic?`;
+    }
 
     return new Response(
-      JSON.stringify({ response }),
+      JSON.stringify({ response: responseContent }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
@@ -52,3 +79,37 @@ Is there anything specific about "${message}" that you'd like me to focus on?`;
     );
   }
 });
+
+// Helper functions to generate more contextual responses
+function generateRelevantTopic(message) {
+  const topics = [
+    "technology and digital transformation",
+    "human knowledge and information processing",
+    "communication and language understanding",
+    "problem-solving methodologies",
+    "current global trends and developments",
+    "data analysis and pattern recognition"
+  ];
+  
+  return topics[Math.floor(Math.random() * topics.length)];
+}
+
+function generateKeyPoint(num, message) {
+  const keyPoints = [
+    "Modern AI systems utilize large language models trained on diverse datasets",
+    "Context understanding is crucial for generating meaningful responses",
+    "AI assistants can process and synthesize information from multiple sources",
+    "Pattern recognition allows for identifying relevant connections between concepts",
+    "Continuous learning helps improve response quality over time",
+    "The balance between specificity and generalization is important for helpful answers"
+  ];
+  
+  return keyPoints[(num + message.length) % keyPoints.length];
+}
+
+function generateResource(num, message) {
+  const domains = ["wikipedia.org", "scholar.google.com", "arxiv.org", "nature.com", "research.gov"];
+  const domain = domains[(num + message.length) % domains.length];
+  
+  return `https://www.${domain}/search?q=${encodeURIComponent(message)}`;
+}

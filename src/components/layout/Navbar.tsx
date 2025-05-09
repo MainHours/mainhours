@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Activity, Settings, Moon, Sun, Newspaper, Bell } from 'lucide-react';
+import { Search, Activity, Settings, Moon, Sun, Newspaper, Bell, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,20 +11,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from '@/hooks/useTheme';
 import { Toggle } from '@/components/ui/toggle';
+
 const Navbar = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
-  const {
-    theme,
-    setTheme
-  } = useTheme();
+  const { theme, setTheme } = useTheme();
+
   const handleLogout = async () => {
-    const {
-      error
-    } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     } else {
@@ -31,6 +27,7 @@ const Navbar = () => {
       navigate('/');
     }
   };
+
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -38,10 +35,13 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
-  return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
@@ -81,16 +81,26 @@ const Navbar = () => {
 
           <Button variant="outline" asChild className="hidden md:flex">
             <Link to="/ai">
+              <Sparkles className="mr-1.5 h-4 w-4 text-mainhours-purple" />
               <span>AI Assistant</span>
             </Link>
           </Button>
-          {user ? <DropdownMenu>
+          
+          {user ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    {user.user_metadata?.avatar_url ? <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata?.full_name || user.email || ''} /> : <AvatarFallback>
+                    {user.user_metadata?.avatar_url ? (
+                      <AvatarImage 
+                        src={user.user_metadata.avatar_url} 
+                        alt={user.user_metadata?.full_name || user.email || ''} 
+                      /> 
+                    ) : (
+                      <AvatarFallback>
                         {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                      </AvatarFallback>}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -109,11 +119,16 @@ const Navbar = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu> : <Button asChild>
+            </DropdownMenu>
+          ) : (
+            <Button asChild>
               <Link to="/auth">Login</Link>
-            </Button>}
+            </Button>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Navbar;
