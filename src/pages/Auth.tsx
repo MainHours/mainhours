@@ -1,31 +1,51 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { Separator } from "@/components/ui/separator";
+import { Check, LogIn } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (error) throw error;
-        alert('Logged in successfully!');
+        toast.success('Successfully logged in!');
         navigate('/');
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            },
+          },
+        });
         if (error) throw error;
-        alert('Registration successful! Check your email.');
+        toast.success('Registration successful! Please check your email to confirm your account.');
       }
     } catch (error: any) {
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -36,100 +56,147 @@ const Auth = () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin },
+        options: {
+          redirectTo: window.location.origin,
+        }
       });
       if (error) throw error;
+      // No need for toast success here as we're being redirected
     } catch (error: any) {
-      alert(error.message);
-      setIsLoading(false);
-    }
-  };
-
-  const handleMicrosoftLogin = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'azure',
-        options: { redirectTo: window.location.origin },
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      alert(error.message);
+      toast.error(error.message);
       setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '2rem auto', padding: '1rem', border: '1px solid #ccc', borderRadius: 6 }}>
-      <h2 style={{ textAlign: 'center' }}>{isLogin ? 'Login' : 'Sign Up'}</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          required
-          onChange={e => setEmail(e.target.value)}
-          style={{ padding: 8, fontSize: 16 }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          required
-          onChange={e => setPassword(e.target.value)}
-          style={{ padding: 8, fontSize: 16 }}
-        />
-        {isLogin && (
-          <label style={{ userSelect: 'none' }}>
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={() => setRememberMe(!rememberMe)}
-              style={{ marginRight: 8 }}
-            />
-            Remember me {rememberMe && '✔️'}
-          </label>
-        )}
-        <button type="submit" disabled={isLoading} style={{ padding: 10, fontSize: 16 }}>
-          {isLoading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md border-0 shadow-lg">
+        <CardContent className="pt-6">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold">{isLogin ? 'Login' : 'Sign Up'}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isLogin ? 'Sign in to your account to continue' : 'Create a new account'}
+            </p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="yourname@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11"
+              />
+            </div>
+            
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="h-11"
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                {isLogin && (
+                  <button type="button" className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder={isLogin ? "Enter your password" : "Choose a strong password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-11"
+              />
+            </div>
 
-      <hr style={{ margin: '1.5rem 0' }} />
-
-      <button
-        onClick={handleGoogleLogin}
-        disabled={isLoading}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10, marginBottom: 10, cursor: 'pointer' }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M21.35 11.1h-9.5v2.9h6.85c-.3 1.7-2.2 5-6.85 5-4.15 0-7.55-3.4-7.55-7.6s3.4-7.6 7.55-7.6c2.35 0 3.9 1 4.8 1.8l2.9-2.85c-1.75-1.6-4-2.6-7.7-2.6-6.5 0-11.8 5.3-11.8 11.8s5.3 11.8 11.8 11.8c6.8 0 11.2-4.75 11.2-11.5 0-.75-.1-1.25-.3-1.65z"/>
-        </svg>
-        Sign in with Google
-      </button>
-
-      <button
-        onClick={handleMicrosoftLogin}
-        disabled={isLoading}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10, cursor: 'pointer', backgroundColor: '#2F2F2F', color: 'white', border: 'none' }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <rect x="1" y="1" width="10" height="10" fill="#F35325" />
-          <rect x="13" y="1" width="10" height="10" fill="#81BC06" />
-          <rect x="1" y="13" width="10" height="10" fill="#05A6F0" />
-          <rect x="13" y="13" width="10" height="10" fill="#FFBA08" />
-        </svg>
-        Sign in with Microsoft
-      </button>
-
-      <p style={{ textAlign: 'center', marginTop: 16 }}>
-        <button onClick={() => setIsLogin(!isLogin)} style={{ cursor: 'pointer', color: 'blue', background: 'none', border: 'none', padding: 0 }}>
-          {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-        </button>
-      </p>
+            {isLogin && (
+              <div className="flex items-center space-x-2">
+                <div 
+                  className={`w-4 h-4 border rounded flex items-center justify-center cursor-pointer ${rememberMe ? 'bg-primary border-primary' : 'border-gray-300'}`}
+                  onClick={() => setRememberMe(!rememberMe)}
+                >
+                  {rememberMe && <Check className="h-3 w-3 text-white" />}
+                </div>
+                <label 
+                  htmlFor="remember-me" 
+                  className="text-sm text-muted-foreground cursor-pointer"
+                  onClick={() => setRememberMe(!rememberMe)}
+                >
+                  Remember me
+                </label>
+              </div>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-black hover:bg-gray-800 text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Processing...' : isLogin ? 'Sign in' : 'Create account'}
+            </Button>
+          </form>
+          
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2 h-11 border-gray-300"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+              </g>
+            </svg>
+            <span>Sign in with Google</span>
+          </Button>
+          
+          <div className="mt-6 text-center">
+            <Button
+              variant="link"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm"
+            >
+              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default Auth;
+
 
