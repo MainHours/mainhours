@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -63,8 +62,8 @@ const Search = () => {
     try {
       const startTime = performance.now();
       
-      // Call the Supabase edge function to get enhanced search results
-      const { data, error } = await supabase.functions.invoke('news-search', {
+      // Call the enhanced search function
+      const { data, error } = await supabase.functions.invoke('search', {
         body: { query: searchQuery }
       });
       
@@ -130,7 +129,7 @@ const Search = () => {
               </div>
             </Avatar>
           )}
-          <div>
+          <div className="flex-1">
             <h3 className="text-xl font-medium text-blue-600 hover:underline cursor-pointer" onClick={() => handleResultClick(result.url)}>
               {result.title}
             </h3>
@@ -142,7 +141,7 @@ const Search = () => {
           </div>
         </div>
         
-        <p className="text-sm text-gray-600 mb-2">{result.description}</p>
+        <p className="text-sm text-gray-600 mb-2 leading-relaxed">{result.description}</p>
         
         <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
           {result.date && (
@@ -265,8 +264,8 @@ const Search = () => {
                         <TabsTrigger value="news">News</TabsTrigger>
                         <TabsTrigger value="video">Videos</TabsTrigger>
                         <TabsTrigger value="academic">Academic</TabsTrigger>
-                        <TabsTrigger value="history">History</TabsTrigger>
-                        <TabsTrigger value="opinion">Opinions</TabsTrigger>
+                        <TabsTrigger value="article">Articles</TabsTrigger>
+                        <TabsTrigger value="forum">Forums</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </div>
