@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Activity, Settings, Moon, Sun, Newspaper, Bell, Sparkles } from 'lucide-react';
@@ -11,15 +10,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from '@/hooks/useTheme';
 import { Toggle } from '@/components/ui/toggle';
-
 const Navbar = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [navQuery, setNavQuery] = useState('');
-  const { theme, setTheme } = useTheme();
-
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast.error(error.message);
     } else {
@@ -27,7 +31,6 @@ const Navbar = () => {
       navigate('/');
     }
   };
-
   const handleNavSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (navQuery.trim()) {
@@ -35,18 +38,15 @@ const Navbar = () => {
       setNavQuery('');
     }
   };
-
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
-
-  return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+  return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <div className="rounded-full bg-gray-100 p-1">
-              <img alt="MainHours Logo" className="h-8 w-8 rounded-full object-contain" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" />
+              <img alt="MainHours Logo" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" className="h" />
             </div>
             <span className="ml-2 text-xl font-bold text-black dark:text-white">MainHours</span>
           </Link>
@@ -86,21 +86,13 @@ const Navbar = () => {
             </Link>
           </Button>
           
-          {user ? (
-            <DropdownMenu>
+          {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    {user.user_metadata?.avatar_url ? (
-                      <AvatarImage 
-                        src={user.user_metadata.avatar_url} 
-                        alt={user.user_metadata?.full_name || user.email || ''} 
-                      /> 
-                    ) : (
-                      <AvatarFallback>
+                    {user.user_metadata?.avatar_url ? <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata?.full_name || user.email || ''} /> : <AvatarFallback>
                         {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                      </AvatarFallback>
-                    )}
+                      </AvatarFallback>}
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -119,16 +111,11 @@ const Navbar = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild>
+            </DropdownMenu> : <Button asChild>
               <Link to="/auth">Login</Link>
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Navbar;
