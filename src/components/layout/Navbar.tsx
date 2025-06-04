@@ -46,7 +46,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <div className="rounded-full bg-gray-100 p-1">
-              <img alt="MainHours Logo" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" className="h" />
+              <img alt="MainHours Logo" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" className=" object-contain" />
             </div>
             <span className="ml-2 text-xl font-bold text-black dark:text-white">MainHours</span>
           </Link>
