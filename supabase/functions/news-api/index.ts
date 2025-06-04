@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -22,6 +21,10 @@ interface NewsArticle {
   time: string;
   url: string;
 }
+
+const generateUniqueId = (article: NewsArticle): string => {
+  return `${article.title}-${article.source}`.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+};
 
 async function fetchFromNewsAPI(category = 'general', source = ''): Promise<NewsArticle[]> {
   if (!NEWS_API_KEY) {
@@ -212,8 +215,9 @@ serve(async (req) => {
     const reqData = await req.json();
     const category = reqData.category || 'general';
     const source = reqData.source || 'all';
+    const excludeIds = reqData.excludeIds || [];
     
-    console.log(`Fetching news for category: ${category}, source: ${source}`);
+    console.log(`Fetching news for category: ${category}, source: ${source}, excluding: ${excludeIds.length} articles`);
     
     let articles: NewsArticle[] = [];
     
@@ -238,13 +242,21 @@ serve(async (req) => {
       articles = generateDefaultArticles(category, source);
     }
     
+    // Filter out excluded articles
+    const filteredArticles = articles.filter(article => {
+      const articleId = generateUniqueId(article);
+      return !excludeIds.includes(articleId);
+    });
+    
     // Deduplicate articles by title
     const uniqueArticles = Array.from(
-      new Map(articles.map(article => [article.title, article])).values()
+      new Map(filteredArticles.map(article => [article.title, article])).values()
     );
     
-    // Shuffle and limit the number of articles
-    const finalArticles = shuffleArray(uniqueArticles).slice(0, 20);
+    // Shuffle and limit the number of articles, ensuring fresh content
+    const finalArticles = shuffleArray(uniqueArticles).slice(0, excludeIds.length > 0 ? 10 : 20);
+    
+    console.log(`Returning ${finalArticles.length} articles (filtered ${articles.length - filteredArticles.length} duplicates)`);
     
     return new Response(
       JSON.stringify({ articles: finalArticles }),
@@ -423,18 +435,21 @@ function generateDefaultArticles(category: string, source: string = 'all'): News
   // If requested category doesn't exist in defaults, use general
   const articlesForCategory = categoryArticles[category] || categoryArticles.general;
   
+  // Add timestamp to make articles unique on each request
+  const timestamp = Date.now();
+  
   return articlesForCategory.map((article, index) => {
     const sourceIndex = index % sources.length;
     const sourceToUse = sources[sourceIndex] || defaultSources[sourceIndex];
     
     return {
-      title: article.title,
+      title: `${article.title} - Update ${Math.floor(timestamp / 60000)}`, // Update every minute
       description: article.description,
       source: sourceToUse,
       category: category,
       imageUrl: article.imageUrl,
-      time: `${index + 1} hours ago`,
-      url: `https://example.com/news/${index}`
+      time: `${index + 1} minutes ago`,
+      url: `https://example.com/news/${timestamp}-${index}`
     };
   });
 }

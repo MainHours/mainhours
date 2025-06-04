@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -36,7 +35,13 @@ const News = () => {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [refreshInterval, setRefreshInterval] = useState<number>(60);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [seenArticleIds, setSeenArticleIds] = useState<Set<string>>(new Set());
   const { t } = useTranslation();
+  
+  const generateUniqueId = (article) => {
+    return `${article.title}-${article.source}`.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  };
+  
   const [newsSources, setNewsSources] = useState<NewsSource[]>([
     { id: 'bbc', name: 'BBC', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png' },
     { id: 'nbc', name: 'NBC News', logo: '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png' },
@@ -49,14 +54,15 @@ const News = () => {
   ]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   
-  const fetchNews = useCallback(async (category: string = 'general') => {
+  const fetchNews = useCallback(async (category: string = 'general', isRefresh: boolean = false) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('news-api', {
         body: { 
           category, 
           source: selectedSourceId || 'all',
-          timestamp: new Date().getTime()  // Add timestamp to prevent caching
+          timestamp: new Date().getTime(),
+          excludeIds: isRefresh ? Array.from(seenArticleIds) : []
         },
       });
       
@@ -68,20 +74,53 @@ const News = () => {
       }
       
       if (data && data.articles && data.articles.length > 0) {
-        // Mark random articles as breaking news for demo purposes
-        const articlesWithBreaking = data.articles.map((article, index) => ({
-          ...article,
-          isBreaking: index === 0 || Math.random() > 0.7, // First article and ~30% of others are breaking news
-          trending: Math.floor(Math.random() * 1000) + 100,
-          comments: Math.floor(Math.random() * 200),
-        }));
+        // Filter out articles we've already seen
+        const newArticles = data.articles.filter(article => {
+          const articleId = generateUniqueId(article);
+          return !seenArticleIds.has(articleId);
+        });
         
-        // Set the first article as featured news
-        setFeaturedNews(articlesWithBreaking[0]);
-        // Set the rest as regular articles
-        setArticles(articlesWithBreaking.slice(1));
+        if (newArticles.length === 0 && isRefresh) {
+          toast.info('No new articles available at this time');
+          setLoading(false);
+          return;
+        }
+        
+        // Mark articles with metadata
+        const articlesWithBreaking = (isRefresh ? newArticles : data.articles).map((article, index) => {
+          const articleId = generateUniqueId(article);
+          return {
+            ...article,
+            id: articleId,
+            isBreaking: index === 0 || Math.random() > 0.7,
+            trending: Math.floor(Math.random() * 1000) + 100,
+            comments: Math.floor(Math.random() * 200),
+            isNew: isRefresh,
+          };
+        });
+        
+        // Update seen articles IDs
+        const newSeenIds = new Set(seenArticleIds);
+        articlesWithBreaking.forEach(article => {
+          newSeenIds.add(article.id);
+        });
+        setSeenArticleIds(newSeenIds);
+        
+        if (isRefresh && newArticles.length > 0) {
+          // For refresh, add new articles to the top
+          setArticles(prev => [...articlesWithBreaking.slice(1), ...prev]);
+          setFeaturedNews(articlesWithBreaking[0]);
+          toast.success(`${newArticles.length} new articles loaded`, { duration: 3000 });
+        } else {
+          // Initial load
+          setFeaturedNews(articlesWithBreaking[0]);
+          setArticles(articlesWithBreaking.slice(1));
+          toast.success('Latest news loaded', { duration: 2000 });
+        }
+        
         setLastUpdated(new Date());
-        toast.success('Latest news loaded', { duration: 2000 });
+      } else if (isRefresh) {
+        toast.info('No new articles available');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -89,29 +128,32 @@ const News = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedSourceId]);
+  }, [selectedSourceId, seenArticleIds]);
   
   useEffect(() => {
+    // Reset seen articles when changing tabs or sources
+    setSeenArticleIds(new Set());
     fetchNews(activeTab === 'featured' ? 'general' : activeTab);
     
     // Setup auto refresh if enabled
     let refreshTimer: number | undefined;
     if (autoRefresh) {
       refreshTimer = window.setInterval(() => {
-        fetchNews(activeTab === 'featured' ? 'general' : activeTab);
-        toast.info(`${t('news.realTimeUpdates')}: ${t('news.justIn')}!`, {
-          duration: 3000
-        });
+        fetchNews(activeTab === 'featured' ? 'general' : activeTab, true);
       }, refreshInterval * 1000);
     }
     
     return () => {
       if (refreshTimer) window.clearInterval(refreshTimer);
     };
-  }, [activeTab, autoRefresh, refreshInterval, fetchNews, t]);
+  }, [activeTab, autoRefresh, refreshInterval, selectedSourceId]);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+  };
+  
+  const handleManualRefresh = () => {
+    fetchNews(activeTab === 'featured' ? 'general' : activeTab, true);
   };
   
   const formatLastUpdated = (date: Date) => {
@@ -122,17 +164,14 @@ const News = () => {
     }).format(date);
   };
   
-  // Get breaking news articles
   const getBreakingNewsArticles = () => {
     return articles.filter(article => article.isBreaking).slice(0, 5);
   };
   
-  // Get trending news articles
   const getTrendingNewsArticles = () => {
     return [...articles].sort((a, b) => b.trending - a.trending).slice(0, 5);
   };
 
-  // Get articles by source
   const getArticlesBySource = (source: string) => {
     return articles.filter(article => article.source.toLowerCase().includes(source.toLowerCase()));
   };
@@ -153,6 +192,7 @@ const News = () => {
                 <h1 className="text-3xl font-bold mb-2 flex items-center">
                   <Newspaper className="h-6 w-6 mr-2 text-mainhours-purple" />
                   MainHours News
+                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">LIVE</span>
                 </h1>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-3 w-3 mr-1" />
@@ -161,11 +201,14 @@ const News = () => {
                     variant="ghost" 
                     size="sm" 
                     className="ml-2 p-1 h-auto" 
-                    onClick={() => fetchNews(activeTab === 'featured' ? 'general' : activeTab)}
+                    onClick={handleManualRefresh}
                     disabled={loading}
                   >
                     <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                   </Button>
+                  <span className="ml-2 text-xs text-green-600 font-medium">
+                    Real-time updates • {seenArticleIds.size} unique articles loaded
+                  </span>
                 </div>
               </div>
               
@@ -257,7 +300,12 @@ const News = () => {
                         .filter(article => !article.isBreaking)
                         .slice(0, 6)
                         .map((article, index) => (
-                          <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow">
+                          <Card key={article.id || index} className="overflow-hidden hover:shadow-md transition-shadow relative">
+                            {article.isNew && (
+                              <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                NEW
+                              </div>
+                            )}
                             <div className="h-48 overflow-hidden">
                               <img 
                                 src={article.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmV3c3xlbnwwfHwwfHx8MA%3D%3D'} 
@@ -312,8 +360,13 @@ const News = () => {
                           </TableHeader>
                           <TableBody>
                             {articles.slice(0, 10).map((article, index) => (
-                              <TableRow key={index}>
-                                <TableCell>{article.time}</TableCell>
+                              <TableRow key={article.id || index} className={article.isNew ? 'bg-green-50 dark:bg-green-900/20' : ''}>
+                                <TableCell>
+                                  <div className="flex items-center">
+                                    {article.isNew && <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>}
+                                    {article.time}
+                                  </div>
+                                </TableCell>
                                 <TableCell>
                                   <a 
                                     href={article.url} 
