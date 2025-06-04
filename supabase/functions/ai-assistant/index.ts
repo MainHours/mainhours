@@ -23,51 +23,52 @@ serve(async (req) => {
       );
     }
 
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    
+    if (!openAIApiKey) {
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
     console.log(`Processing AI request: ${message}`);
 
-    // More sophisticated AI response generation
-    const query = message.toLowerCase();
-    let responseContent = '';
-    
-    // Generate response based on message context
-    if (query.includes('hello') || query.includes('hi')) {
-      responseContent = `Hello! I'm Nebulosa, a modern AI assistant. How can I help you today?`;
-    } 
-    else if (query.includes('how are you')) {
-      responseContent = `I'm functioning optimally, thank you for asking! As an AI, I don't experience feelings, but I'm ready to assist you with information, creative tasks, or problem-solving. What can I help you with?`;
+    // Call OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: `You are Nebulosa, a modern AI assistant integrated into MainHours. You are helpful, knowledgeable, and friendly. You can assist with various tasks including answering questions, providing explanations, helping with research, creative writing, problem-solving, and more. Keep your responses informative but conversational.` 
+          },
+          { role: 'user', content: message }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('OpenAI API error:', error);
+      return new Response(
+        JSON.stringify({ error: 'Failed to get response from AI' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
-    else if (query.includes('what can you do') || query.includes('capabilities') || query.includes('features')) {
-      responseContent = `As a modern AI assistant, I can:
 
-1. Answer factual questions and provide information on various topics
-2. Assist with research by providing relevant links and resources
-3. Help generate creative content or ideas
-4. Explain complex concepts in simple terms
-5. Provide insights on current events and trending topics
-6. Assist with problem-solving and analysis
-
-What would you like help with today?`;
-    }
-    else {
-      // Simulate a more sophisticated AI response
-      responseContent = `Based on your query about "${message}", here's what I found:
-
-I analyzed your question and can provide some relevant information. This topic relates to ${generateRelevantTopic(message)}. 
-
-Some key points to consider:
-- ${generateKeyPoint(1, message)}
-- ${generateKeyPoint(2, message)}
-- ${generateKeyPoint(3, message)}
-
-For more detailed information, you might want to explore:
-- ${generateResource(1, message)}
-- ${generateResource(2, message)}
-
-Would you like me to elaborate on any specific aspect of this topic?`;
-    }
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
 
     return new Response(
-      JSON.stringify({ response: responseContent }),
+      JSON.stringify({ response: aiResponse }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
@@ -79,37 +80,3 @@ Would you like me to elaborate on any specific aspect of this topic?`;
     );
   }
 });
-
-// Helper functions to generate more contextual responses
-function generateRelevantTopic(message) {
-  const topics = [
-    "technology and digital transformation",
-    "human knowledge and information processing",
-    "communication and language understanding",
-    "problem-solving methodologies",
-    "current global trends and developments",
-    "data analysis and pattern recognition"
-  ];
-  
-  return topics[Math.floor(Math.random() * topics.length)];
-}
-
-function generateKeyPoint(num, message) {
-  const keyPoints = [
-    "Modern AI systems utilize large language models trained on diverse datasets",
-    "Context understanding is crucial for generating meaningful responses",
-    "AI assistants can process and synthesize information from multiple sources",
-    "Pattern recognition allows for identifying relevant connections between concepts",
-    "Continuous learning helps improve response quality over time",
-    "The balance between specificity and generalization is important for helpful answers"
-  ];
-  
-  return keyPoints[(num + message.length) % keyPoints.length];
-}
-
-function generateResource(num, message) {
-  const domains = ["wikipedia.org", "scholar.google.com", "arxiv.org", "nature.com", "research.gov"];
-  const domain = domains[(num + message.length) % domains.length];
-  
-  return `https://www.${domain}/search?q=${encodeURIComponent(message)}`;
-}
