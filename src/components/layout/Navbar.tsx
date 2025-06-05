@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from '@/hooks/useTheme';
 import { Toggle } from '@/components/ui/toggle';
+
 const Navbar = () => {
   const {
     user
@@ -45,8 +46,8 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
-            <div className="rounded-full bg-gray-100 p-1">
-              <img alt="MainHours Logo" src="/lovable-uploads/5cb4fa6b-e749-498c-858b-aabb4e4cdc50.png" className="" />
+            <div className="rounded-full bg-white p-1 w-8 h-8 flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full border border-gray-300"></div>
             </div>
             <span className="ml-2 text-xl font-bold text-black dark:text-white">MainHours</span>
           </Link>
@@ -118,4 +119,5 @@ const Navbar = () => {
       </div>
     </header>;
 };
+
 export default Navbar;
