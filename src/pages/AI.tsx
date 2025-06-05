@@ -1,223 +1,256 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Sidebar from '@/components/layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
-import { Bot, SendHorizonal, Loader2, Sparkles } from 'lucide-react';
+import { Bot, Menu, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
+import ChatMessage from '@/components/ai/ChatMessage';
+import ChatInput from '@/components/ai/ChatInput';
+import ChatSidebar from '@/components/ai/ChatSidebar';
+
+interface Message {
+  id: string;
+  sender: 'user' | 'ai';
+  content: string;
+  timestamp: Date;
+  type?: 'text' | 'image';
+  imageUrl?: string;
+}
+
+interface Chat {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  messageCount: number;
+  messages: Message[];
+}
 
 const AI = () => {
   const isMobile = useIsMobile();
-  const [messages, setMessages] = React.useState([{
-    sender: 'ai',
-    content: "Hello! I'm Nebulosa, your AI assistant powered by advanced language processing. How can I assist you today?"
-  }]);
-  const [input, setInput] = React.useState('');
-  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [chats, setChats] = useState<Chat[]>([
+    {
+      id: '1',
+      title: 'Welcome Chat',
+      updatedAt: new Date(),
+      messageCount: 1,
+      messages: [
+        {
+          id: '1',
+          sender: 'ai',
+          content: "Hello! I'm Nebulosa, your AI assistant. I can help you with various tasks including answering questions, generating images, creative writing, and much more. How can I assist you today?",
+          timestamp: new Date(),
+          type: 'text'
+        }
+      ]
+    }
+  ]);
+  
+  const [currentChatId, setCurrentChatId] = useState('1');
+  const [isLoading, setIsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
+  const currentChat = chats.find(chat => chat.id === currentChatId);
+  const messages = currentChat?.messages || [];
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth"
-    });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  
-  const handleSend = async () => {
-    if (input.trim() && !isProcessing) {
-      // Add user message
-      const userMessage = {
-        sender: 'user',
-        content: input
-      };
-      setMessages(prev => [...prev, userMessage]);
-      setInput('');
-      setIsProcessing(true);
-      
-      try {
-        // Send request to AI assistant edge function
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('ai-assistant', {
-          body: {
-            message: input.trim()
-          }
-        });
-        
-        if (error) throw new Error(error.message);
 
-        // Add AI response gradually with typing effect
-        let response = data.response;
-        
-        setMessages(prev => [...prev, {
-          sender: 'ai',
-          content: response
-        }]);
-        setIsProcessing(false);
-      } catch (error) {
-        console.error('AI assistant error:', error);
-        toast.error('Failed to get AI response. Please try again.');
-        setIsProcessing(false);
-      }
+  const handleSendMessage = async (content: string, type: 'text' | 'image' = 'text') => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      content,
+      timestamp: new Date(),
+      type
+    };
+
+    // Add user message to current chat
+    setChats(prev => prev.map(chat => 
+      chat.id === currentChatId 
+        ? { 
+            ...chat, 
+            messages: [...chat.messages, userMessage],
+            messageCount: chat.messageCount + 1,
+            updatedAt: new Date()
+          }
+        : chat
+    ));
+
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-assistant', {
+        body: { message: content }
+      });
+      
+      if (error) throw new Error(error.message);
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        content: data.response,
+        timestamp: new Date(),
+        type: 'text'
+      };
+
+      // Add AI response to current chat
+      setChats(prev => prev.map(chat => 
+        chat.id === currentChatId 
+          ? { 
+              ...chat, 
+              messages: [...chat.messages, aiMessage],
+              messageCount: chat.messageCount + 1,
+              updatedAt: new Date()
+            }
+          : chat
+      ));
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to get response. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+
+  const handleGenerateImage = async (prompt: string) => {
+    // For now, we'll just show a placeholder - you can implement actual image generation
+    toast.info('Image generation feature coming soon!');
+  };
+
+  const handleNewChat = () => {
+    const newChat: Chat = {
+      id: Date.now().toString(),
+      title: 'New Chat',
+      updatedAt: new Date(),
+      messageCount: 0,
+      messages: []
+    };
+    
+    setChats(prev => [newChat, ...prev]);
+    setCurrentChatId(newChat.id);
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    if (isMobile) {
+      setSidebarOpen(false);
     }
   };
-  
+
+  const handleDeleteChat = (chatId: string) => {
+    setChats(prev => prev.filter(chat => chat.id !== chatId));
+    if (currentChatId === chatId && chats.length > 1) {
+      const remainingChats = chats.filter(chat => chat.id !== chatId);
+      setCurrentChatId(remainingChats[0]?.id || '');
+    }
+  };
+
+  const handleRenameChat = (chatId: string, newTitle: string) => {
+    setChats(prev => prev.map(chat => 
+      chat.id === chatId ? { ...chat, title: newTitle } : chat
+    ));
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-background/95">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <div className="flex-1 flex">
-        {!isMobile && (
-          <div className="hidden md:block w-64 border-r">
-            <Sidebar />
+      
+      <div className="flex-1 flex overflow-hidden">
+        {/* Mobile sidebar toggle */}
+        {isMobile && (
+          <div className="absolute top-20 left-4 z-50">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </Button>
           </div>
         )}
-        <main className="flex-1 overflow-y-auto flex flex-col">
-          <div className="p-4 md:p-6 pb-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-5 w-5 text-mainhours-purple" />
-              <h1 className="text-3xl font-bold">AI Assistant</h1>
+
+        {/* Sidebar */}
+        {(sidebarOpen || !isMobile) && (
+          <ChatSidebar
+            chats={chats}
+            currentChatId={currentChatId}
+            onNewChat={handleNewChat}
+            onSelectChat={handleSelectChat}
+            onDeleteChat={handleDeleteChat}
+            onRenameChat={handleRenameChat}
+          />
+        )}
+
+        {/* Main chat area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="border-b bg-background p-4">
+            <div className="flex items-center gap-2 max-w-4xl mx-auto">
+              <div className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 p-2">
+                <Bot className="text-white h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold">Nebulosa AI</h1>
+                <p className="text-sm text-muted-foreground">
+                  {currentChat?.title || 'AI Assistant'}
+                </p>
+              </div>
             </div>
-            <p className="text-muted-foreground flex items-center gap-1">
-              <span>Powered by advanced language models</span>
-            </p>
           </div>
-          
-          <div className="flex-grow flex flex-col p-4 md:p-6">
-            <Card className="flex-grow flex flex-col shadow-lg border-mainhours-purple/10">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 p-1 flex items-center justify-center w-10 h-10">
-                    <Bot className="text-white h-5 w-5" />
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-center p-8">
+                <div className="max-w-md space-y-4">
+                  <div className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 p-4 w-16 h-16 mx-auto flex items-center justify-center">
+                    <Bot className="text-white h-8 w-8" />
                   </div>
-                  <div>
-                    <CardTitle className="flex items-center">
-                      Nebulosa AI
-                      <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-mainhours-purple/20 text-mainhours-purple">
-                        v2.0
-                      </span>
-                    </CardTitle>
-                    <CardDescription>
-                      Advanced language processing
-                    </CardDescription>
-                  </div>
+                  <h2 className="text-2xl font-semibold">Start a conversation</h2>
+                  <p className="text-muted-foreground">
+                    Ask me anything! I can help with questions, creative writing, analysis, and more.
+                  </p>
                 </div>
-              </CardHeader>
-              
-              <CardContent className="flex-grow overflow-y-auto space-y-4 pb-4">
-                {messages.map((message, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div 
-                      className={`flex gap-3 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
-                    >
-                      <Avatar className={`h-10 w-10 ${message.sender === 'user' ? '' : 'ring-2 ring-mainhours-purple/20'}`}>
-                        {message.sender === 'ai' ? (
-                          <AvatarImage 
-                            alt="AI" 
-                            src="/lovable-uploads/a803f0aa-3b5c-4d71-b922-ff8d1eb26c9c.png" 
-                            className="object-cover" 
-                          />
-                        ) : (
-                          <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                        )}
-                        <AvatarFallback>
-                          {message.sender === 'ai' ? 'AI' : 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div 
-                        className={`rounded-lg p-4 ${
-                          message.sender === 'user' 
-                            ? 'bg-gradient-to-r from-mainhours-purple to-purple-700 text-white shadow-md' 
-                            : 'bg-card border border-border shadow-sm'
-                        }`}
-                      >
-                        {message.content.split('\n').map((text, i) => (
-                          <p key={i} className={i > 0 ? 'mt-2' : ''}>
-                            {text}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+              </div>
+            ) : (
+              <div className="max-w-4xl mx-auto">
+                {messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
                 ))}
-                <div ref={messagesEndRef} />
-                
-                {isProcessing && (
-                  <div className="flex justify-start">
-                    <div className="flex gap-3 max-w-[85%]">
-                      <Avatar className="h-10 w-10 ring-2 ring-mainhours-purple/20">
-                        <AvatarImage 
-                          alt="AI" 
-                          src="/lovable-uploads/a803f0aa-3b5c-4d71-b922-ff8d1eb26c9c.png" 
-                        />
-                        <AvatarFallback>AI</AvatarFallback>
-                      </Avatar>
-                      <div className="rounded-lg p-4 bg-card border border-border shadow-sm flex items-center">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                        </div>
-                      </div>
+                {isLoading && (
+                  <div className="flex gap-4 p-6 bg-muted/30">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+                      <Bot className="text-white h-4 w-4" />
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-mainhours-purple rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
                   </div>
                 )}
-              </CardContent>
-              
-              <CardFooter className="pt-4 border-t">
-                <div className="flex flex-col w-full gap-2">
-                  <div className="relative">
-                    <Textarea 
-                      value={input} 
-                      onChange={e => setInput(e.target.value)} 
-                      onKeyDown={handleKeyPress} 
-                      placeholder="Ask me anything..." 
-                      className="pr-12 min-h-[80px] resize-none focus-visible:ring-mainhours-purple" 
-                      disabled={isProcessing} 
-                    />
-                    <Button 
-                      size="icon" 
-                      className="absolute bottom-3 right-3 rounded-full h-8 w-8 bg-mainhours-purple hover:bg-mainhours-purple/90"
-                      onClick={handleSend} 
-                      disabled={isProcessing || !input.trim()}
-                    >
-                      {isProcessing ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <SendHorizonal className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-xs text-muted-foreground">Shift + Enter for new line</p>
-                    <p className="text-xs text-muted-foreground">
-                      {input.length > 0 ? `${input.length} characters` : 'Enter to send'}
-                    </p>
-                  </div>
-                </div>
-              </CardFooter>
-            </Card>
+                <div ref={messagesEndRef} />
+              </div>
+            )}
           </div>
-        </main>
+
+          {/* Input */}
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            onGenerateImage={handleGenerateImage}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
