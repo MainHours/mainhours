@@ -6,14 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search as SearchIcon, Loader2, Calendar, Clock, Link as LinkIcon, ExternalLink, Bookmark, Share2, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Search as SearchIcon, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
-import { Avatar } from '@/components/ui/avatar';
+import SearchResultCard from '@/components/search/SearchResultCard';
 
 interface SearchResult {
   title: string;
@@ -35,6 +33,7 @@ const Search = () => {
   const [searchTime, setSearchTime] = useState(0);
   const [relatedQueries, setRelatedQueries] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchSource, setSearchSource] = useState<string>('');
   
   // Extract query from URL on page load
   useEffect(() => {
@@ -62,7 +61,7 @@ const Search = () => {
     try {
       const startTime = performance.now();
       
-      // Call the enhanced search function
+      // Call the enhanced search function with SerpAPI
       const { data, error } = await supabase.functions.invoke('search', {
         body: { query: searchQuery }
       });
@@ -77,6 +76,11 @@ const Search = () => {
       console.log('Search results:', data);
       setSearchResults(data.results || []);
       setRelatedQueries(data.relatedQueries || []);
+      setSearchSource(data.source || 'unknown');
+      
+      if (data.source === 'fallback') {
+        toast.info('Using backup search results. Real-time results may be limited.');
+      }
     } catch (error) {
       console.error('Search error:', error);
       toast.error('Failed to perform search. Please try again.');
@@ -96,80 +100,6 @@ const Search = () => {
     setQuery(relatedQuery);
     navigate(`/search?q=${encodeURIComponent(relatedQuery)}`);
     performSearch(relatedQuery);
-  };
-  
-  const getTypeColor = (type: string) => {
-    const typeColors: Record<string, string> = {
-      news: 'bg-blue-500',
-      article: 'bg-green-500',
-      search: 'bg-gray-500',
-      video: 'bg-red-500',
-      forum: 'bg-yellow-500',
-      social: 'bg-purple-500',
-      code: 'bg-emerald-500',
-      shopping: 'bg-pink-500',
-      analysis: 'bg-indigo-500',
-      opinion: 'bg-amber-500',
-      explainer: 'bg-cyan-500',
-      history: 'bg-lime-500',
-      academic: 'bg-violet-500',
-    };
-    
-    return typeColors[type] || 'bg-gray-500';
-  };
-  
-  const renderSearchResult = (result: SearchResult, index: number) => {
-    return (
-      <div key={index} className="mb-8 hover:bg-slate-50 p-4 rounded-lg transition-colors">
-        <div className="flex items-start gap-3 mb-2">
-          {result.source && (
-            <Avatar className="h-6 w-6">
-              <div className={`h-6 w-6 flex items-center justify-center rounded-full ${getTypeColor(result.type)}`}>
-                <span className="text-white text-xs font-bold">{result.source[0]}</span>
-              </div>
-            </Avatar>
-          )}
-          <div className="flex-1">
-            <h3 className="text-xl font-medium text-blue-600 hover:underline cursor-pointer" onClick={() => handleResultClick(result.url)}>
-              {result.title}
-            </h3>
-            <div className="flex items-center text-sm text-green-700 mb-1">
-              <LinkIcon className="h-3 w-3 mr-1" />
-              <span className="mr-2 max-w-[300px] truncate">{result.url}</span>
-              {result.source && <span className="text-gray-600">· {result.source}</span>}
-            </div>
-          </div>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-2 leading-relaxed">{result.description}</p>
-        
-        <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-          {result.date && (
-            <div className="flex items-center">
-              <Clock className="h-3 w-3 mr-1" />
-              <span>{format(new Date(result.date), 'MMM d, yyyy')}</span>
-            </div>
-          )}
-          <Badge variant="outline" className={`text-xs ${getTypeColor(result.type)} bg-opacity-10 border-none text-gray-700`}>
-            {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
-          </Badge>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-6 px-2">
-              <ThumbsUp className="h-3 w-3 mr-1" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-6 px-2">
-              <ThumbsDown className="h-3 w-3 mr-1" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-6 px-2">
-              <Bookmark className="h-3 w-3" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-6 px-2">
-              <Share2 className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   const renderSearchResultSkeleton = () => {
@@ -203,6 +133,12 @@ const Search = () => {
                 <SearchIcon className="h-6 w-6" />
               </div>
               <h1 className="text-3xl font-bold">MainHours Search</h1>
+              {searchSource === 'serpapi' && (
+                <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+                  <ExternalLink className="h-4 w-4" />
+                  <span>Live Results</span>
+                </div>
+              )}
             </div>
             
             <Card className="mb-8 shadow-md">
@@ -265,18 +201,31 @@ const Search = () => {
                         <TabsTrigger value="video">Videos</TabsTrigger>
                         <TabsTrigger value="academic">Academic</TabsTrigger>
                         <TabsTrigger value="article">Articles</TabsTrigger>
-                        <TabsTrigger value="forum">Forums</TabsTrigger>
+                        <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </div>
                   
                   <div className="mb-6 text-sm text-muted-foreground flex items-center gap-1">
                     About <span className="font-bold">{filteredResults.length}</span> results ({searchTime.toFixed(2)} seconds)
+                    {searchSource === 'fallback' && (
+                      <div className="flex items-center gap-1 text-amber-600 ml-2">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>Limited results</span>
+                      </div>
+                    )}
                   </div>
                   
                   {filteredResults.length > 0 ? (
                     <div>
-                      {filteredResults.map((result, index) => renderSearchResult(result, index))}
+                      {filteredResults.map((result, index) => (
+                        <SearchResultCard 
+                          key={index}
+                          result={result}
+                          index={index}
+                          onResultClick={handleResultClick}
+                        />
+                      ))}
                     </div>
                   ) : (
                     <Card>
@@ -302,7 +251,7 @@ const Search = () => {
                             <li key={index}>
                               <Button 
                                 variant="link" 
-                                className="text-blue-600 p-0 h-auto font-normal text-left w-full justify-start"
+                                className="text-blue-600 dark:text-blue-400 p-0 h-auto font-normal text-left w-full justify-start"
                                 onClick={() => handleRelatedQueryClick(relatedQuery)}
                               >
                                 {relatedQuery}
