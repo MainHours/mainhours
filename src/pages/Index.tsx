@@ -3,7 +3,6 @@ import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
-import FeaturedPost from '@/components/dashboard/FeaturedPost';
 import AIAssistant from '@/components/dashboard/AIAssistant';
 import SearchBox from '@/components/dashboard/SearchBox';
 import NewsCard from '@/components/dashboard/NewsCard';
@@ -19,78 +18,122 @@ const Index = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
       <div className="flex-1 flex">
         {!isMobile && (
-          <div className="hidden md:block w-64 border-r">
+          <div className="hidden md:block w-64 border-r bg-white/80">
             <Sidebar />
           </div>
         )}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">{t('common.welcome')}</h1>
-            <p className="text-muted-foreground">
-              {t('common.subtitle')}
-            </p>
-            
-            {/* First row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="col-span-full md:col-span-1 lg:col-span-1">
-                <SearchBox />
-              </div>
-              <div className="col-span-full md:col-span-1 lg:col-span-1 h-[200px] md:h-auto">
-                <WeatherWidget />
-              </div>
-              <div className="col-span-full md:col-span-1 lg:col-span-1 h-[200px] md:h-auto">
-                <TrendingTopics />
-              </div>
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* AOL-style Header */}
+            <div className="text-center py-8 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-lg text-white shadow-lg">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome to MainHours</h1>
+              <p className="text-xl opacity-90">Your Gateway to Everything Online</p>
             </div>
             
-            {/* Second row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-full md:col-span-1 h-[500px] md:h-auto">
-                <FeaturedPost
-                  username="alex_morgan"
-                  avatarUrl="https://i.pravatar.cc/150?img=1"
-                  imageUrl="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2l0eXxlbnwwfHwwfHx8MA%3D%3D"
-                  caption="Beautiful day exploring the city! #cityscape #adventure"
-                  likes={524}
-                  comments={32}
-                  timeAgo="2 hours ago"
-                />
-              </div>
-              <div className="col-span-full md:col-span-1">
-                <NewsCard
-                  title="Major Breakthrough in Renewable Energy Technology"
-                  description="Scientists have developed a new solar panel that can generate electricity at night, a major advancement in renewable energy technology."
-                  source="CNN"
-                  category="Technology"
-                  imageUrl="https://images.unsplash.com/photo-1509390144018-eeaf65052242?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c29sYXIlMjBwYW5lbHxlbnwwfHwwfHx8MA%3D%3D"
-                  time="3 hours ago"
-                />
-                <div className="h-4"></div>
-                <NewsCard
-                  title="Global Leaders Agree on New Climate Initiatives"
-                  description="World leaders have reached a consensus on ambitious new climate initiatives during the annual Climate Summit held in Geneva."
-                  source="CNN"
-                  category="Politics"
-                  imageUrl="https://images.unsplash.com/photo-1624638760852-62a4efacabfc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2xpbWF0ZSUyMGNoYW5nZXxlbnwwfHwwfHx8MA%3D%3D"
-                  time="5 hours ago"
-                />
-              </div>
-              <div className="col-span-full md:col-span-1">
-                <div className="grid gap-6">
-                  <StockWidget />
-                  <SportsUpdate />
+            {/* Search Bar - Prominent like AOL */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-200">
+              <SearchBox />
+            </div>
+            
+            {/* Main Content Grid - AOL Portal Style */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Left Column - News & Information */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">📰 Today's Headlines</h2>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <NewsCard
+                      title="Major Breakthrough in Renewable Energy Technology"
+                      description="Scientists have developed a new solar panel that can generate electricity at night, a major advancement in renewable energy technology."
+                      source="CNN"
+                      category="Technology"
+                      imageUrl="https://images.unsplash.com/photo-1509390144018-eeaf65052242?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c29sYXIlMjBwYW5lbHxlbnwwfHwwfHx8MA%3D%3D"
+                      time="3 hours ago"
+                    />
+                    <NewsCard
+                      title="Global Leaders Agree on New Climate Initiatives"
+                      description="World leaders have reached a consensus on ambitious new climate initiatives during the annual Climate Summit held in Geneva."
+                      source="Reuters"
+                      category="Politics"
+                      imageUrl="https://images.unsplash.com/photo-1624638760852-62a4efacabfc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2xpbWF0ZSUyMGNoYW5nZXxlbnwwfHwwfHx8MA%3D%3D"
+                      time="5 hours ago"
+                    />
+                  </div>
+                </div>
+
+                {/* AI Assistant Section */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">🤖 AI Assistant</h2>
+                  </div>
+                  <div className="p-4 h-[350px]">
+                    <AIAssistant />
+                  </div>
                 </div>
               </div>
+              
+              {/* Right Column - Widgets & Quick Info */}
+              <div className="space-y-6">
+                
+                {/* Weather Widget */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">🌤️ Weather</h2>
+                  </div>
+                  <div className="p-4">
+                    <WeatherWidget />
+                  </div>
+                </div>
+
+                {/* Stock Market */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">📈 Markets</h2>
+                  </div>
+                  <div className="p-4">
+                    <StockWidget />
+                  </div>
+                </div>
+
+                {/* Sports */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">🏈 Sports</h2>
+                  </div>
+                  <div className="p-4">
+                    <SportsUpdate />
+                  </div>
+                </div>
+
+                {/* Trending Topics */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className="bg-gradient-to-r from-pink-600 to-pink-700 text-white px-4 py-2 rounded-t-lg">
+                    <h2 className="text-lg font-bold">🔥 Trending</h2>
+                  </div>
+                  <div className="p-4">
+                    <TrendingTopics />
+                  </div>
+                </div>
+
+              </div>
             </div>
-            
-            {/* Third row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="col-span-full md:col-span-3 h-[400px] md:h-[350px]">
-                <AIAssistant />
+
+            {/* Bottom Banner - AOL Style */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 text-center shadow-lg">
+              <h3 className="text-2xl font-bold mb-2">Explore More</h3>
+              <p className="mb-4">Discover news, entertainment, sports, and much more!</p>
+              <div className="flex justify-center space-x-4 text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded">News</span>
+                <span className="bg-white/20 px-3 py-1 rounded">Sports</span>
+                <span className="bg-white/20 px-3 py-1 rounded">Weather</span>
+                <span className="bg-white/20 px-3 py-1 rounded">Finance</span>
               </div>
             </div>
           </div>
