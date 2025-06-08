@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Thermometer, Wind, CloudDrizzle, CloudSun } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the location type
 interface Location {
@@ -22,6 +23,8 @@ interface CurrentWeather {
   windSpeed: number;
   windDirection: string;
   icon: string;
+  feelsLike: number;
+  pressure: number;
 }
 
 // Define the forecast type
@@ -42,7 +45,9 @@ const WeatherWidget = () => {
     humidity: 0,
     windSpeed: 0,
     windDirection: "N",
-    icon: "☁️"
+    icon: "☁️",
+    feelsLike: 0,
+    pressure: 0
   });
 
   const [forecast, setForecast] = useState<ForecastDay[]>([
@@ -54,25 +59,6 @@ const WeatherWidget = () => {
   ]);
 
   const [loading, setLoading] = useState(true);
-
-  // Helper function to get weather icon
-  const getWeatherIcon = (condition: string): string => {
-    const conditionLower = condition.toLowerCase();
-    if (conditionLower.includes('rain') || conditionLower.includes('drizzle')) return '🌧️';
-    if (conditionLower.includes('cloud')) return '☁️';
-    if (conditionLower.includes('sunny') || conditionLower.includes('clear')) return '☀️';
-    if (conditionLower.includes('snow')) return '❄️';
-    if (conditionLower.includes('storm') || conditionLower.includes('thunder')) return '⛈️';
-    if (conditionLower.includes('fog') || conditionLower.includes('mist')) return '🌫️';
-    if (conditionLower.includes('partly')) return '⛅';
-    return '☁️';
-  };
-
-  // Get day of the week
-  const getDayOfWeek = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
-  };
 
   // Get user's location using browser geolocation
   const getUserLocation = (): Promise<Location> => {
@@ -111,62 +97,43 @@ const WeatherWidget = () => {
     }
   };
 
-  // Fetch weather data
+  // Fetch weather data from our Supabase edge function
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
         setLoading(true);
+        
         // Get user location
         const { lat, lon } = await getUserLocation();
         
         // Get city name
         const cityName = await getCityName(lat, lon);
         
-        // For demo purposes, we'll use a mock API response since we don't have an actual Meteum API key
-        // In a real implementation, you would replace this with an actual API call
+        console.log(`Fetching weather for ${cityName} at ${lat}, ${lon}`);
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Get current date
-        const today = new Date();
-        const currentTemp = Math.round(15 + Math.random() * 10); // Random temp between 15-25°C
-        const highTemp = currentTemp + Math.round(Math.random() * 5);
-        const lowTemp = currentTemp - Math.round(Math.random() * 5);
-        
-        // Set current weather
-        const currentCondition = ["Clear", "Partly Cloudy", "Cloudy", "Light Rain"][Math.floor(Math.random() * 4)];
-        setCurrentWeather({
-          location: cityName,
-          temperature: currentTemp,
-          condition: currentCondition,
-          high: highTemp,
-          low: lowTemp,
-          humidity: Math.round(40 + Math.random() * 40), // Random humidity between 40-80%
-          windSpeed: Math.round(5 + Math.random() * 15), // Random wind speed between 5-20 km/h
-          windDirection: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.floor(Math.random() * 8)],
-          icon: getWeatherIcon(currentCondition)
+        // Call our weather API edge function
+        const { data, error } = await supabase.functions.invoke('weather-api', {
+          body: { lat, lon, location: cityName }
         });
         
-        // Set forecast for next 5 days
-        const forecastData: ForecastDay[] = [];
-        for (let i = 0; i < 5; i++) {
-          const forecastDate = new Date(today);
-          forecastDate.setDate(today.getDate() + i + 1);
-          
-          const condition = ["Clear", "Partly Cloudy", "Cloudy", "Light Rain"][Math.floor(Math.random() * 4)];
-          forecastData.push({
-            day: getDayOfWeek(forecastDate),
-            temp: Math.round(10 + Math.random() * 15), // Random temp between 10-25°C
-            condition: condition,
-            icon: getWeatherIcon(condition)
-          });
+        if (error) {
+          console.error('Error fetching weather data:', error);
+          toast.error('Failed to fetch weather data');
+          setLoading(false);
+          return;
         }
-        setForecast(forecastData);
+        
+        if (data && data.current && data.forecast) {
+          setCurrentWeather(data.current);
+          setForecast(data.forecast);
+          
+          console.log('Weather data loaded successfully');
+          toast.success(`Weather updated for ${data.current.location}`);
+        } else {
+          throw new Error('Invalid weather data received');
+        }
         
         setLoading(false);
-        
-        toast.success(`Weather updated for ${cityName}`);
         
       } catch (error) {
         console.error('Error fetching weather data:', error);
@@ -191,7 +158,7 @@ const WeatherWidget = () => {
             <CloudSun className="h-5 w-5 mr-2" />
             Weather
           </CardTitle>
-          <Badge>Meteum</Badge>
+          <Badge>Tomorrow.io</Badge>
         </div>
       </CardHeader>
       <CardContent>
