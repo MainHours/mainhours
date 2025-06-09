@@ -13,6 +13,11 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { toast } from 'sonner';
 import { ChartContainer, ChartTooltipContent, ChartTooltip } from '@/components/ui/chart';
 import { supabase } from '@/integrations/supabase/client';
+import MarketSummary from '@/components/finance/MarketSummary';
+import MarketMovers from '@/components/finance/MarketMovers';
+import SectorPerformance from '@/components/finance/SectorPerformance';
+import MarketStats from '@/components/finance/MarketStats';
+import Watchlist from '@/components/finance/Watchlist';
 
 interface Stock {
   symbol: string;
@@ -34,7 +39,7 @@ const Finance = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('overview');
   const [stockData, setStockData] = useState<Stock[]>([]);
   const [marketNews, setMarketNews] = useState<NewsItem[]>([]);
 
@@ -146,7 +151,7 @@ const Finance = () => {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold">Finance</h1>
+                <h1 className="text-3xl font-bold">Finance Dashboard</h1>
                 <div className="flex items-center mt-1 text-sm text-muted-foreground">
                   <Badge className="mr-2 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900 dark:text-blue-100">Finnhub</Badge>
                   <span className="flex items-center">
@@ -180,126 +185,76 @@ const Finance = () => {
                 </Button>
               </form>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <Card className="col-span-full md:col-span-2 bg-white dark:bg-gray-800 shadow-sm border-0">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">Market Overview</CardTitle>
-                      <CardDescription>Year-to-date performance of top stocks</CardDescription>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200">YTD</Badge>
-                      <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1D</Badge>
-                      <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1M</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="h-80">
-                  <ChartContainer config={chartConfig} className="h-full">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.4} />
-                      <XAxis
-                        dataKey="name"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={{ stroke: "var(--border)" }}
-                      />
-                      <YAxis
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={{ stroke: "var(--border)" }}
-                        tickFormatter={(value) => `$${value}`}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="AAPL"
-                        strokeWidth={2}
-                        stroke="var(--color-AAPL)"
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="MSFT"
-                        strokeWidth={2}
-                        stroke="var(--color-MSFT)"
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="GOOGL"
-                        strokeWidth={2}
-                        stroke="var(--color-GOOGL)"
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                      />
-                    </LineChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg">
-                    <ChartLine className="h-5 w-5 mr-2 text-blue-600" /> 
-                    Market News
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {marketNews.length > 0 ? (
-                      marketNews.map((news, index) => (
-                        <div key={index} className={index < marketNews.length - 1 ? "border-b pb-4" : ""}>
-                          <h3 className="font-medium hover:text-blue-600 cursor-pointer">
-                            {news.url ? (
-                              <a href={news.url} target="_blank" rel="noopener noreferrer">
-                                {news.title}
-                              </a>
-                            ) : (
-                              news.title
-                            )}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-1">{news.description}</p>
-                          <p className="text-xs text-muted-foreground">{news.time}</p>
+
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="mb-6 bg-gray-100 dark:bg-gray-800">
+                <TabsTrigger value="overview">Market Overview</TabsTrigger>
+                <TabsTrigger value="stocks">Stocks</TabsTrigger>
+                <TabsTrigger value="charts">Charts</TabsTrigger>
+                <TabsTrigger value="news">News</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-6">
+                {/* Market Summary */}
+                <MarketSummary />
+
+                {/* Market Stats and Watchlist */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <MarketStats />
+                  <Watchlist />
+                </div>
+
+                {/* Market Movers and Sector Performance */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <MarketMovers />
+                  <SectorPerformance />
+                </div>
+
+                {/* Market News */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg">
+                      <ChartLine className="h-5 w-5 mr-2 text-blue-600" /> 
+                      Latest Market News
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {marketNews.length > 0 ? (
+                        marketNews.slice(0, 6).map((news, index) => (
+                          <div key={index} className="border-b pb-4 last:border-b-0">
+                            <h3 className="font-medium hover:text-blue-600 cursor-pointer mb-2">
+                              {news.url ? (
+                                <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                  {news.title}
+                                </a>
+                              ) : (
+                                news.title
+                              )}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-1">{news.description}</p>
+                            <p className="text-xs text-muted-foreground">{news.time}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-2 text-center py-4">
+                          <p className="text-muted-foreground">Loading market news...</p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-muted-foreground">Loading market news...</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <Button variant="link" className="ml-auto px-0 text-blue-600">
-                    More news
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-            
-            <Card className="mb-8 bg-white dark:bg-gray-800 shadow-sm border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center text-xl">
-                  <DollarSign className="h-5 w-5 mr-2 text-green-600" /> 
-                  Stock Market
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="mb-4 bg-gray-100 dark:bg-gray-800">
-                    <TabsTrigger value="all">All Stocks</TabsTrigger>
-                    <TabsTrigger value="tech">Technology</TabsTrigger>
-                    <TabsTrigger value="healthcare">Healthcare</TabsTrigger>
-                    <TabsTrigger value="consumer">Consumer</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="all" className="mt-0 p-0">
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="stocks" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-xl">
+                      <DollarSign className="h-5 w-5 mr-2 text-green-600" /> 
+                      Stock Market
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-50 dark:bg-gray-900">
@@ -352,81 +307,114 @@ const Finance = () => {
                         </TableBody>
                       </Table>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tech" className="mt-0 p-0">
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
-                          <TableRow>
-                            <TableHead className="w-[100px]">Symbol</TableHead>
-                            <TableHead>Company</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
-                            <TableHead className="text-right">Change</TableHead>
-                            <TableHead className="text-right">Market Cap</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {stockData.slice(0, 5).map((stock) => (
-                            <TableRow key={stock.symbol} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <TableCell className="font-medium">{stock.symbol}</TableCell>
-                              <TableCell>{stock.name}</TableCell>
-                              <TableCell className="text-right">${stock.price.toFixed(2)}</TableCell>
-                              <TableCell className={`text-right ${
-                                stock.change > 0 ? 'text-green-600' : 'text-red-600'
-                              }`}>
-                                <div className="flex items-center justify-end">
-                                  {stock.change > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                                  {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)}%
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">{stock.marketCap}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="charts" className="space-y-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-xl">Market Performance</CardTitle>
+                        <CardDescription>Year-to-date performance of top stocks</CardDescription>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200">YTD</Badge>
+                        <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1D</Badge>
+                        <Badge variant="outline" className="border-gray-200 bg-transparent hover:bg-gray-100">1M</Badge>
+                      </div>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="healthcare" className="mt-0 p-0">
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
-                          <TableRow>
-                            <TableHead className="w-[100px]">Symbol</TableHead>
-                            <TableHead>Company</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
-                            <TableHead className="text-right">Change</TableHead>
-                            <TableHead className="text-right">Market Cap</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <TableCell className="font-medium">JNJ</TableCell>
-                            <TableCell>Johnson & Johnson</TableCell>
-                            <TableCell className="text-right">$148.90</TableCell>
-                            <TableCell className="text-right text-green-600">
-                              <div className="flex items-center justify-end">
-                                <TrendingUp className="h-3 w-3 mr-1" />
-                                +0.21%
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">358.1B</TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
+                  </CardHeader>
+                  <CardContent className="h-96">
+                    <ChartContainer config={chartConfig} className="h-full">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.4} />
+                        <XAxis
+                          dataKey="name"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={{ stroke: "var(--border)" }}
+                        />
+                        <YAxis
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={{ stroke: "var(--border)" }}
+                          tickFormatter={(value) => `$${value}`}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="AAPL"
+                          strokeWidth={2}
+                          stroke="var(--color-AAPL)"
+                          dot={false}
+                          activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="MSFT"
+                          strokeWidth={2}
+                          stroke="var(--color-MSFT)"
+                          dot={false}
+                          activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="GOOGL"
+                          strokeWidth={2}
+                          stroke="var(--color-GOOGL)"
+                          dot={false}
+                          activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="news" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg">
+                      <ChartLine className="h-5 w-5 mr-2 text-blue-600" /> 
+                      Financial News
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {marketNews.length > 0 ? (
+                        marketNews.map((news, index) => (
+                          <div key={index} className="border-b pb-6 last:border-b-0">
+                            <h2 className="text-xl font-semibold hover:text-blue-600 cursor-pointer mb-3">
+                              {news.url ? (
+                                <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                  {news.title}
+                                </a>
+                              ) : (
+                                news.title
+                              )}
+                            </h2>
+                            <p className="text-muted-foreground mb-2">{news.description}</p>
+                            <p className="text-sm text-muted-foreground">{news.time}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">Loading financial news...</p>
+                        </div>
+                      )}
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="consumer" className="mt-0 p-0">
-                    <div className="text-center py-12">
-                      <h3 className="text-xl font-medium">Consumer Sector Data Coming Soon</h3>
-                      <p className="text-muted-foreground">We're working on adding this data!</p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="link" className="ml-auto px-0 text-blue-600">
+                      View all news
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
