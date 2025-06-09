@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -13,6 +12,22 @@ import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { ChartContainer, ChartTooltipContent, ChartTooltip } from '@/components/ui/chart';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Stock {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  marketCap: string;
+}
+
+interface NewsItem {
+  title: string;
+  description: string;
+  time: string;
+  url?: string;
+}
 
 const Finance = () => {
   const isMobile = useIsMobile();
@@ -20,18 +35,10 @@ const Finance = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [activeTab, setActiveTab] = useState('all');
+  const [stockData, setStockData] = useState<Stock[]>([]);
+  const [marketNews, setMarketNews] = useState<NewsItem[]>([]);
 
-  const stockData = [
-    { symbol: 'AAPL', name: 'Apple Inc.', price: 181.42, change: 0.85, marketCap: '2.85T' },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', price: 416.78, change: -0.32, marketCap: '3.10T' },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 164.25, change: 1.23, marketCap: '2.05T' },
-    { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 179.62, change: -0.45, marketCap: '1.87T' },
-    { symbol: 'META', name: 'Meta Platforms Inc.', price: 474.99, change: 2.15, marketCap: '1.21T' },
-    { symbol: 'TSLA', name: 'Tesla Inc.', price: 176.75, change: -1.24, marketCap: '564.2B' },
-    { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 881.86, change: 3.47, marketCap: '2.17T' },
-    { symbol: 'JNJ', name: 'Johnson & Johnson', price: 148.90, change: 0.21, marketCap: '358.1B' }
-  ];
-  
+  // Chart data (keeping mock data for now as historical data requires additional API calls)
   const chartData = [
     { name: 'Jan', AAPL: 143.5, MSFT: 312.4, GOOGL: 143.7 },
     { name: 'Feb', AAPL: 150.8, MSFT: 325.2, GOOGL: 148.2 },
@@ -46,24 +53,6 @@ const Finance = () => {
     { name: 'Nov', AAPL: 183.7, MSFT: 414.5, GOOGL: 167.2 },
     { name: 'Dec', AAPL: 181.4, MSFT: 416.8, GOOGL: 164.3 }
   ];
-  
-  const marketNews = [
-    {
-      title: "Fed Signals Potential Rate Cut",
-      description: "Federal Reserve hints at possible interest rate reduction in upcoming meeting.",
-      time: "2 hours ago"
-    },
-    {
-      title: "Tech Sector Leads Market Rally",
-      description: "Technology stocks drive market gains amid positive earnings reports.",
-      time: "4 hours ago"
-    },
-    {
-      title: "Oil Prices Stabilize After Recent Fluctuations",
-      description: "Crude oil prices show signs of stability following weeks of volatility.",
-      time: "5 hours ago"
-    }
-  ];
 
   const chartConfig = {
     AAPL: { label: "Apple", theme: { light: "#8884d8", dark: "#a78bfa" } },
@@ -71,8 +60,42 @@ const Finance = () => {
     GOOGL: { label: "Google", theme: { light: "#ffc658", dark: "#facc15" } },
   };
 
+  // Fetch stock data from Finnhub API
+  const fetchStockData = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Fetching stock data from Finnhub API...');
+      
+      const { data, error } = await supabase.functions.invoke('stock-api', {
+        body: {
+          symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JNJ'],
+          includeNews: true
+        }
+      });
+
+      if (error) {
+        console.error('Error fetching stock data:', error);
+        toast.error('Failed to fetch stock data');
+        return;
+      }
+
+      if (data) {
+        console.log('Stock data received:', data);
+        setStockData(data.stocks || []);
+        setMarketNews(data.news || []);
+        setLastUpdated(new Date());
+        toast.success('Market data updated');
+      }
+    } catch (error) {
+      console.error('Error fetching stock data:', error);
+      toast.error('Failed to fetch stock data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Function to handle stock search
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (searchQuery.trim()) {
@@ -88,21 +111,19 @@ const Finance = () => {
 
   // Function to refresh data
   const refreshData = () => {
-    setIsLoading(true);
-    
-    // Simulate data refresh
-    setTimeout(() => {
-      setLastUpdated(new Date());
-      setIsLoading(false);
-      toast.success("Market data refreshed");
-    }, 1000);
+    fetchStockData();
   };
 
-  // Auto-update effect (simulated)
+  // Load initial data
+  useEffect(() => {
+    fetchStockData();
+  }, []);
+
+  // Auto-update effect
   useEffect(() => {
     const interval = setInterval(() => {
-      setLastUpdated(new Date());
-    }, 60000); // Update every minute
+      fetchStockData();
+    }, 300000); // Update every 5 minutes
     
     return () => clearInterval(interval);
   }, []);
@@ -127,7 +148,7 @@ const Finance = () => {
               <div>
                 <h1 className="text-3xl font-bold">Finance</h1>
                 <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                  <Badge className="mr-2 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900 dark:text-blue-100">MSN Money</Badge>
+                  <Badge className="mr-2 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900 dark:text-blue-100">Finnhub</Badge>
                   <span className="flex items-center">
                     <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
                     <Button 
@@ -231,13 +252,27 @@ const Finance = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {marketNews.map((news, index) => (
-                      <div key={index} className={index < marketNews.length - 1 ? "border-b pb-4" : ""}>
-                        <h3 className="font-medium hover:text-blue-600 cursor-pointer">{news.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-1">{news.description}</p>
-                        <p className="text-xs text-muted-foreground">{news.time}</p>
+                    {marketNews.length > 0 ? (
+                      marketNews.map((news, index) => (
+                        <div key={index} className={index < marketNews.length - 1 ? "border-b pb-4" : ""}>
+                          <h3 className="font-medium hover:text-blue-600 cursor-pointer">
+                            {news.url ? (
+                              <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                {news.title}
+                              </a>
+                            ) : (
+                              news.title
+                            )}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-1">{news.description}</p>
+                          <p className="text-xs text-muted-foreground">{news.time}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-muted-foreground">Loading market news...</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="pt-0">
@@ -277,26 +312,40 @@ const Finance = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredStocks.map((stock) => (
-                            <TableRow key={stock.symbol} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <TableCell className="font-medium">{stock.symbol}</TableCell>
-                              <TableCell>{stock.name}</TableCell>
-                              <TableCell className="text-right">${stock.price.toFixed(2)}</TableCell>
-                              <TableCell className={`text-right ${
-                                stock.change > 0 ? 'text-green-600' : 'text-red-600'
-                              }`}>
-                                <div className="flex items-center justify-end">
-                                  {stock.change > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                                  {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)}%
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">{stock.marketCap}</TableCell>
-                            </TableRow>
-                          ))}
-                          {filteredStocks.length === 0 && searchQuery && (
+                          {filteredStocks.length > 0 ? (
+                            filteredStocks.map((stock) => (
+                              <TableRow key={stock.symbol} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <TableCell className="font-medium">{stock.symbol}</TableCell>
+                                <TableCell>{stock.name}</TableCell>
+                                <TableCell className="text-right">${stock.price.toFixed(2)}</TableCell>
+                                <TableCell className={`text-right ${
+                                  stock.change > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  <div className="flex items-center justify-end">
+                                    {stock.change > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                                    {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)}%
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">{stock.marketCap}</TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
                             <TableRow>
-                              <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
-                                No stocks found matching "{searchQuery}"
+                              <TableCell colSpan={5} className="text-center py-4">
+                                {isLoading ? (
+                                  <div className="flex items-center justify-center">
+                                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                                    Loading stock data...
+                                  </div>
+                                ) : searchQuery ? (
+                                  <span className="text-muted-foreground">
+                                    No stocks found matching "{searchQuery}"
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">
+                                    No stock data available
+                                  </span>
+                                )}
                               </TableCell>
                             </TableRow>
                           )}
