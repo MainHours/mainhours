@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from '@/hooks/useTranslation';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { CloudSun, Droplets, Wind, Thermometer } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -14,24 +15,24 @@ const WeatherForecast = () => {
   const [forecastType, setForecastType] = React.useState("daily");
   const [loading, setLoading] = React.useState(false);
   const [dailyData, setDailyData] = React.useState([
-    { day: 'Mon', temp: 21, humidity: 65, wind: 12 },
-    { day: 'Tue', temp: 22, humidity: 62, wind: 14 },
-    { day: 'Wed', temp: 20, humidity: 68, wind: 10 },
-    { day: 'Thu', temp: 25, humidity: 55, wind: 8 },
-    { day: 'Fri', temp: 23, humidity: 60, wind: 11 },
-    { day: 'Sat', temp: 22, humidity: 63, wind: 13 },
-    { day: 'Sun', temp: 24, humidity: 58, wind: 9 },
+    { day: 'Mon', temp: 21, humidity: 65, wind: 12, high: 24, low: 18, precipitation: 20 },
+    { day: 'Tue', temp: 22, humidity: 62, wind: 14, high: 25, low: 19, precipitation: 10 },
+    { day: 'Wed', temp: 20, humidity: 68, wind: 10, high: 23, low: 17, precipitation: 60 },
+    { day: 'Thu', temp: 25, humidity: 55, wind: 8, high: 28, low: 22, precipitation: 5 },
+    { day: 'Fri', temp: 23, humidity: 60, wind: 11, high: 26, low: 20, precipitation: 15 },
+    { day: 'Sat', temp: 22, humidity: 63, wind: 13, high: 25, low: 19, precipitation: 30 },
+    { day: 'Sun', temp: 24, humidity: 58, wind: 9, high: 27, low: 21, precipitation: 0 },
   ]);
 
   const [hourlyData, setHourlyData] = React.useState([
-    { hour: '00:00', temp: 18, humidity: 70, wind: 8 },
-    { hour: '03:00', temp: 17, humidity: 72, wind: 7 },
-    { hour: '06:00', temp: 16, humidity: 75, wind: 6 },
-    { hour: '09:00', temp: 19, humidity: 68, wind: 8 },
-    { hour: '12:00', temp: 22, humidity: 60, wind: 10 },
-    { hour: '15:00', temp: 24, humidity: 55, wind: 12 },
-    { hour: '18:00', temp: 21, humidity: 62, wind: 10 },
-    { hour: '21:00', temp: 19, humidity: 68, wind: 9 },
+    { hour: '00:00', temp: 18, humidity: 70, wind: 8, precipitation: 0 },
+    { hour: '03:00', temp: 17, humidity: 72, wind: 7, precipitation: 5 },
+    { hour: '06:00', temp: 16, humidity: 75, wind: 6, precipitation: 10 },
+    { hour: '09:00', temp: 19, humidity: 68, wind: 8, precipitation: 0 },
+    { hour: '12:00', temp: 22, humidity: 60, wind: 10, precipitation: 0 },
+    { hour: '15:00', temp: 24, humidity: 55, wind: 12, precipitation: 0 },
+    { hour: '18:00', temp: 21, humidity: 62, wind: 10, precipitation: 20 },
+    { hour: '21:00', temp: 19, humidity: 68, wind: 9, precipitation: 30 },
   ]);
 
   // Different locations for the demo
@@ -43,64 +44,6 @@ const WeatherForecast = () => {
     "Paris",
     "Berlin"
   ];
-
-  // Get coordinates for location
-  const getLocationCoordinates = (locationName: string) => {
-    const coords = {
-      "New York": { lat: 40.7128, lon: -74.0060 },
-      "London": { lat: 51.5074, lon: -0.1278 },
-      "Tokyo": { lat: 35.6762, lon: 139.6503 },
-      "Sydney": { lat: -33.8688, lon: 151.2093 },
-      "Paris": { lat: 48.8566, lon: 2.3522 },
-      "Berlin": { lat: 52.5200, lon: 13.4050 }
-    };
-    return coords[locationName] || coords["New York"];
-  };
-
-  // Fetch weather data for selected location
-  const fetchWeatherData = async (locationName: string) => {
-    setLoading(true);
-    try {
-      const coordinates = getLocationCoordinates(locationName);
-      
-      const { data, error } = await supabase.functions.invoke('weather-api', {
-        body: { 
-          lat: coordinates.lat, 
-          lon: coordinates.lon, 
-          location: locationName 
-        }
-      });
-      
-      if (error) {
-        console.error('Error fetching weather data:', error);
-        toast.error('Failed to fetch weather data');
-        return;
-      }
-      
-      if (data && data.forecast) {
-        // Convert forecast data to chart format
-        const newDailyData = data.forecast.map((day: any, index: number) => ({
-          day: day.day,
-          temp: day.temp,
-          humidity: Math.round(50 + Math.random() * 30), // Mock humidity for now
-          wind: Math.round(5 + Math.random() * 15) // Mock wind for now
-        }));
-        
-        setDailyData(newDailyData);
-        toast.success(`Weather forecast updated for ${locationName}`);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to fetch weather data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch data when location changes
-  React.useEffect(() => {
-    fetchWeatherData(location);
-  }, [location]);
 
   // Chart configuration
   const chartConfig = {
@@ -166,13 +109,13 @@ const WeatherForecast = () => {
         
         {!loading && (
           <div className="space-y-6">
-            {/* Fixed height container to prevent overlapping */}
-            <div className="h-[280px] w-full overflow-hidden">
+            {/* Temperature Chart */}
+            <div className="h-[300px] w-full">
               <ChartContainer config={chartConfig}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
+                  <LineChart
                     data={forecastType === 'daily' ? dailyData : hourlyData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                     <XAxis 
@@ -181,106 +124,99 @@ const WeatherForecast = () => {
                       tickLine={false}
                     />
                     <YAxis 
-                      yAxisId="temp"
-                      domain={[10, 30]}
                       tick={{ fontSize: 12 }}
                       tickLine={false}
                       tickFormatter={(value) => `${value}°C`}
-                    />
-                    <YAxis 
-                      yAxisId="humidity"
-                      orientation="right"
-                      domain={[0, 100]}
-                      hide
-                    />
-                    <YAxis 
-                      yAxisId="wind"
-                      orientation="right"
-                      domain={[0, 20]}
-                      hide
                     />
                     <ChartTooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="bg-background border rounded p-3">
-                              <p className="font-medium mb-1">{label}</p>
-                              <p className="text-sm flex items-center gap-1 mb-1">
-                                <Thermometer className="h-4 w-4 text-orange-500" />
-                                {t('climate.temperature')}: {payload[0].value}°C
-                              </p>
-                              <p className="text-sm flex items-center gap-1 mb-1">
-                                <Droplets className="h-4 w-4 text-blue-500" />
-                                {t('climate.humidity')}: {payload[1].value}%
-                              </p>
-                              <p className="text-sm flex items-center gap-1">
-                                <Wind className="h-4 w-4 text-green-500" />
-                                {t('climate.wind')}: {payload[2].value} km/h
-                              </p>
+                            <div className="bg-background border rounded p-3 shadow-lg">
+                              <p className="font-medium mb-2">{label}</p>
+                              {payload.map((entry, index) => (
+                                <p key={index} className="text-sm flex items-center gap-2">
+                                  <div 
+                                    className="w-3 h-3 rounded" 
+                                    style={{ backgroundColor: entry.color }}
+                                  />
+                                  {entry.name}: {entry.value}
+                                  {entry.dataKey === 'temp' ? '°C' : 
+                                   entry.dataKey === 'humidity' ? '%' : 
+                                   entry.dataKey === 'wind' ? ' km/h' : 
+                                   entry.dataKey === 'precipitation' ? '%' : ''}
+                                </p>
+                              ))}
                             </div>
                           );
                         }
                         return null;
                       }}
                     />
-                    <Area
+                    <Line
                       type="monotone"
                       dataKey="temp"
-                      name="Temperature"
-                      fill="url(#colorTemp)"
-                      stroke="var(--color-temperature)"
-                      yAxisId="temp"
-                      fillOpacity={0.3}
+                      stroke="#f97316"
+                      strokeWidth={3}
+                      dot={{ fill: '#f97316', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
-                    <Area
-                      type="monotone"
-                      dataKey="humidity"
-                      name="Humidity"
-                      fill="url(#colorHumidity)"
-                      stroke="var(--color-humidity)"
-                      yAxisId="humidity"
-                      fillOpacity={0.3}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="wind"
-                      name="Wind"
-                      fill="url(#colorWind)"
-                      stroke="var(--color-wind)"
-                      yAxisId="wind"
-                      fillOpacity={0.3}
-                    />
-                    <defs>
-                      <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorHumidity" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorWind" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                  </AreaChart>
+                    {forecastType === 'daily' && (
+                      <>
+                        <Line
+                          type="monotone"
+                          dataKey="high"
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          dot={false}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="low"
+                          stroke="#3b82f6"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          dot={false}
+                        />
+                      </>
+                    )}
+                  </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            {/* Weather Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {(forecastType === 'daily' ? dailyData : hourlyData).slice(0, 4).map((item, index) => (
-                <Card key={index} className="bg-background/50">
+                <Card key={index} className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                   <CardContent className="p-4 text-center">
-                    <p className="font-medium">{forecastType === 'daily' ? item.day : item.hour}</p>
-                    <div className="text-2xl my-1">
+                    <p className="font-medium text-blue-900 mb-1">
+                      {forecastType === 'daily' ? item.day : item.hour}
+                    </p>
+                    <div className="text-3xl my-2">
                       {item.temp > 22 ? '☀️' : item.temp > 18 ? '⛅' : '☁️'}
                     </div>
-                    <p className="text-lg font-semibold">{item.temp}°C</p>
-                    <div className="text-xs text-muted-foreground mt-2 flex justify-between">
-                      <span>{item.humidity}%</span>
-                      <span>{item.wind} km/h</span>
+                    <p className="text-xl font-bold text-blue-900 mb-2">{item.temp}°C</p>
+                    {forecastType === 'daily' && 'high' in item && (
+                      <p className="text-xs text-blue-700 mb-1">
+                        H: {item.high}° L: {item.low}°
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-1 text-xs text-blue-600">
+                      <div className="flex items-center justify-center">
+                        <Droplets className="h-3 w-3 mr-1" />
+                        {item.humidity}%
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <Wind className="h-3 w-3 mr-1" />
+                        {item.wind}km/h
+                      </div>
+                      {'precipitation' in item && (
+                        <div className="col-span-2 flex items-center justify-center mt-1">
+                          <span className="text-blue-500">💧 {item.precipitation}%</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
