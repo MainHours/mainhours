@@ -15,24 +15,19 @@ const Index = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex-1 flex">
         {!isMobile && (
-          <div className="hidden md:block w-64 border-r bg-white/80">
+          <div className="hidden md:block w-64 border-r bg-white">
             <Sidebar />
           </div>
         )}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* MainHours Header */}
-            <div className="text-center py-8 bg-gradient-to-r from-red-600 via-red-700 to-red-800 rounded-lg text-white shadow-lg">
-              <h1 className="text-4xl md:text-5xl font-bold mb-2 font-serif">MainHours</h1>
-              <p className="text-xl opacity-90 font-light">Your Premier News & Information Portal</p>
-            </div>
             
             {/* Search Bar */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-2 border-red-200">
+            <div className="bg-white rounded-lg shadow-sm p-4 border">
               <SearchBox />
             </div>
             
@@ -41,13 +36,11 @@ const Index = () => {
               
               {/* Left Column - Featured News */}
               <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-lg shadow-md border border-gray-200">
-                  <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3 rounded-t-lg">
-                    <h2 className="text-lg font-bold font-serif flex items-center">
-                      📰 Today's Top Headlines
-                    </h2>
+                <div className="bg-white rounded-lg shadow-sm border">
+                  <div className="border-b px-4 py-3">
+                    <h2 className="text-lg font-semibold text-gray-900">Top Stories</h2>
                   </div>
-                  <div className="p-6 space-y-6">
+                  <div className="p-4 space-y-4">
                     <NewsCard
                       title="Breaking: Major Breakthrough in Renewable Energy Technology"
                       description="Scientists have developed revolutionary solar panel technology that can generate electricity during nighttime hours, marking a significant advancement in renewable energy solutions."
@@ -76,36 +69,36 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* News Categories Quick Access */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200">
-                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-t-lg">
-                    <h2 className="text-lg font-bold font-serif">📊 News Categories</h2>
+                {/* Quick Links */}
+                <div className="bg-white rounded-lg shadow-sm border">
+                  <div className="border-b px-4 py-3">
+                    <h2 className="text-lg font-semibold text-gray-900">Quick Access</h2>
                   </div>
-                  <div className="p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">💼</div>
-                        <div className="font-semibold text-red-700">Business</div>
+                  <div className="p-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <a href="/news" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">📰</div>
+                        <div className="font-medium text-gray-700">News</div>
                       </a>
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">💻</div>
-                        <div className="font-semibold text-red-700">Technology</div>
+                      <a href="/finance" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">💼</div>
+                        <div className="font-medium text-gray-700">Finance</div>
                       </a>
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">🏥</div>
-                        <div className="font-semibold text-red-700">Health</div>
+                      <a href="/climate" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">🌤️</div>
+                        <div className="font-medium text-gray-700">Weather</div>
                       </a>
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">🔬</div>
-                        <div className="font-semibold text-red-700">Science</div>
+                      <a href="/ai" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">🤖</div>
+                        <div className="font-medium text-gray-700">AI</div>
                       </a>
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">🌍</div>
-                        <div className="font-semibold text-red-700">World</div>
+                      <a href="/search" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">🔍</div>
+                        <div className="font-medium text-gray-700">Search</div>
                       </a>
-                      <a href="/news" className="p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-center">
-                        <div className="text-2xl mb-2">⚖️</div>
-                        <div className="font-semibold text-red-700">Politics</div>
+                      <a href="/trends" className="p-3 border rounded hover:bg-gray-50 transition-colors text-center text-sm">
+                        <div className="text-lg mb-1">📈</div>
+                        <div className="font-medium text-gray-700">Trends</div>
                       </a>
                     </div>
                   </div>
@@ -116,9 +109,9 @@ const Index = () => {
               <div className="space-y-6">
                 
                 {/* Weather Widget */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200">
-                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-t-lg">
-                    <h2 className="text-lg font-bold">🌤️ Weather</h2>
+                <div className="bg-white rounded-lg shadow-sm border">
+                  <div className="border-b px-4 py-3">
+                    <h2 className="text-lg font-semibold text-gray-900">Weather</h2>
                   </div>
                   <div className="p-4">
                     <WeatherWidget />
@@ -126,53 +119,40 @@ const Index = () => {
                 </div>
 
                 {/* Stock Market */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200">
-                  <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-3 rounded-t-lg">
-                    <h2 className="text-lg font-bold">📈 Markets</h2>
+                <div className="bg-white rounded-lg shadow-sm border">
+                  <div className="border-b px-4 py-3">
+                    <h2 className="text-lg font-semibold text-gray-900">Markets</h2>
                   </div>
                   <div className="p-4">
                     <StockWidget />
                   </div>
                 </div>
 
-                {/* News Sources */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200">
-                  <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-4 py-3 rounded-t-lg">
-                    <h2 className="text-lg font-bold">📺 Trusted Sources</h2>
+                {/* Trending Topics */}
+                <div className="bg-white rounded-lg shadow-sm border">
+                  <div className="border-b px-4 py-3">
+                    <h2 className="text-lg font-semibold text-gray-900">Trending</h2>
                   </div>
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <img src="/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png" alt="NBC" className="h-8" />
-                      <span className="font-medium">NBC News</span>
+                  <div className="p-4 space-y-2">
+                    <div className="text-sm">
+                      <a href="#" className="text-blue-600 hover:underline">Climate Change Solutions</a>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <img src="/lovable-uploads/d1f13521-e392-4bc7-abbc-b7e96474c2e0.png" alt="Reuters" className="h-8" />
-                      <span className="font-medium">Reuters</span>
+                    <div className="text-sm">
+                      <a href="#" className="text-blue-600 hover:underline">Tech Innovation</a>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png" alt="BBC" className="h-8" />
-                      <span className="font-medium">BBC News</span>
+                    <div className="text-sm">
+                      <a href="#" className="text-blue-600 hover:underline">Global Economy</a>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png" alt="CNN" className="h-8" />
-                      <span className="font-medium">CNN</span>
+                    <div className="text-sm">
+                      <a href="#" className="text-blue-600 hover:underline">Health Advances</a>
+                    </div>
+                    <div className="text-sm">
+                      <a href="#" className="text-blue-600 hover:underline">Space Exploration</a>
                     </div>
                   </div>
                 </div>
 
               </div>
-            </div>
-
-            {/* Bottom Call-to-Action */}
-            <div className="bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg p-6 text-center shadow-lg">
-              <h3 className="text-2xl font-bold mb-2 font-serif">Stay Informed</h3>
-              <p className="mb-4 font-light">Get the latest breaking news and in-depth coverage from trusted sources</p>
-              <a 
-                href="/news" 
-                className="inline-block bg-white text-red-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
-                Read Full News Coverage
-              </a>
             </div>
           </div>
         </main>

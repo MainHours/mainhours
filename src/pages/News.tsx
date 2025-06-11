@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -23,6 +22,7 @@ import { RefreshCw, Clock, Newspaper, ExternalLink } from 'lucide-react';
 import NewsHero from '@/components/dashboard/NewsHero';
 import BreakingNewsSection from '@/components/dashboard/BreakingNewsSection';
 import TrendingNewsSection from '@/components/dashboard/TrendingNewsSection';
+import SportsUpdate from '@/components/dashboard/SportsUpdate';
 
 const News = () => {
   const isMobile = useIsMobile();
@@ -240,6 +240,12 @@ const News = () => {
                   >
                     Science
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="sports" 
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
+                  >
+                    Sports
+                  </TabsTrigger>
                 </TabsList>
               </div>
               
@@ -275,8 +281,22 @@ const News = () => {
                       </div>
                     </div>
                     
-                    {/* Trending Section */}
-                    <TrendingNewsSection trendingArticles={getTrendingNewsArticles()} />
+                    {/* Sports Section - Only show on sports tab */}
+                    {activeTab === 'sports' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                          <TrendingNewsSection trendingArticles={getTrendingNewsArticles()} />
+                        </div>
+                        <div>
+                          <SportsUpdate />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Trending Section - Show on non-sports tabs */}
+                    {activeTab !== 'sports' && (
+                      <TrendingNewsSection trendingArticles={getTrendingNewsArticles()} />
+                    )}
                     
                     {/* Latest News Grid */}
                     <div>
