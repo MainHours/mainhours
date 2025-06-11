@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -18,12 +19,10 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
-import { RefreshCw, Clock, Newspaper, Bell, ExternalLink, Star, TrendingUp } from 'lucide-react';
+import { RefreshCw, Clock, Newspaper, ExternalLink } from 'lucide-react';
 import NewsHero from '@/components/dashboard/NewsHero';
 import BreakingNewsSection from '@/components/dashboard/BreakingNewsSection';
-import NewsSourcesGrid from '@/components/dashboard/NewsSourcesGrid';
 import TrendingNewsSection from '@/components/dashboard/TrendingNewsSection';
-import { NewsSource } from '@/types/news';
 
 const News = () => {
   const isMobile = useIsMobile();
@@ -41,25 +40,13 @@ const News = () => {
     return `${article.title}-${article.source}`.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   };
   
-  const [newsSources, setNewsSources] = useState<NewsSource[]>([
-    { id: 'bbc', name: 'BBC', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/BBC_Logo_2021.svg/1200px-BBC_Logo_2021.svg.png' },
-    { id: 'nbc', name: 'NBC News', logo: '/lovable-uploads/700af6d9-ee4a-44d6-827b-a76ffae80ed2.png' },
-    { id: 'nyt', name: 'New York Times', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/NewYorkTimes.svg/1200px-NewYorkTimes.svg.png' },
-    { id: 'cnn', name: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png' },
-    { id: 'fox', name: 'Fox News', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/1200px-Fox_News_Channel_logo.svg.png' },
-    { id: 'wapo', name: 'Washington Post', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/The_Logo_of_The_Washington_Post_Newspaper.svg/1200px-The_Logo_of_The_Washington_Post_Newspaper.svg.png' },
-    { id: 'reuters', name: 'Reuters', logo: '/lovable-uploads/d1f13521-e392-4bc7-abbc-b7e96474c2e0.png' },
-    { id: 'guardian', name: 'The Guardian', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/The_Guardian_2018.svg/1200px-The_Guardian_2018.svg.png' },
-  ]);
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
-  
   const fetchNews = useCallback(async (category: string = 'general', isRefresh: boolean = false) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('news-api', {
         body: { 
           category, 
-          source: selectedSourceId || 'all',
+          source: 'all',
           timestamp: new Date().getTime(),
           excludeIds: isRefresh ? Array.from(seenArticleIds) : []
         },
@@ -122,7 +109,7 @@ const News = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedSourceId, seenArticleIds]);
+  }, [seenArticleIds]);
   
   useEffect(() => {
     setSeenArticleIds(new Set());
@@ -138,7 +125,7 @@ const News = () => {
     return () => {
       if (refreshTimer) window.clearInterval(refreshTimer);
     };
-  }, [activeTab, autoRefresh, refreshInterval, selectedSourceId]);
+  }, [activeTab, autoRefresh, refreshInterval]);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -174,68 +161,49 @@ const News = () => {
           </div>
         )}
         <main className="flex-1 overflow-y-auto">
-          {/* News Portal Header */}
-          <div className="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white">
-            <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-                <div className="mb-4 md:mb-0">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-2 font-serif">
-                    MainHours News
-                  </h1>
-                  <p className="text-xl font-light opacity-90">Breaking News & Latest Updates</p>
-                  <div className="flex items-center mt-2 text-sm">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Last Updated: {formatLastUpdated(lastUpdated)}
-                    <span className="ml-3 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">
-                      LIVE
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">Auto Refresh</span>
-                    <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleManualRefresh}
-                      disabled={loading}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                    >
-                      <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    </Button>
-                  </div>
-                  
-                  {autoRefresh && (
-                    <Select 
-                      value={refreshInterval.toString()} 
-                      onValueChange={(value) => setRefreshInterval(parseInt(value))}
-                    >
-                      <SelectTrigger className="w-28 bg-white/10 border-white/20 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="30">30s</SelectItem>
-                        <SelectItem value="60">1m</SelectItem>
-                        <SelectItem value="300">5m</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            {/* Simple Header */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+              <div className="mb-4 md:mb-0">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white font-serif">
+                  News
+                </h1>
+                <div className="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Last Updated: {formatLastUpdated(lastUpdated)}
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            {/* News Sources */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-3 font-serif">News Sources</h2>
-              <NewsSourcesGrid 
-                sources={newsSources} 
-                selectedSourceId={selectedSourceId} 
-                onSourceSelect={setSelectedSourceId} 
-              />
+              
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">Auto Refresh</span>
+                  <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleManualRefresh}
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                
+                {autoRefresh && (
+                  <Select 
+                    value={refreshInterval.toString()} 
+                    onValueChange={(value) => setRefreshInterval(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30s</SelectItem>
+                      <SelectItem value="60">1m</SelectItem>
+                      <SelectItem value="300">5m</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
             
             {/* News Categories */}
@@ -244,31 +212,31 @@ const News = () => {
                 <TabsList className="bg-transparent h-auto p-0 space-x-0">
                   <TabsTrigger 
                     value="headlines" 
-                    className="border-b-2 border-transparent data-[state=active]:border-red-600 data-[state=active]:bg-transparent data-[state=active]:text-red-600 rounded-none px-6 py-3 font-semibold"
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
                   >
                     Top Headlines
                   </TabsTrigger>
                   <TabsTrigger 
                     value="business" 
-                    className="border-b-2 border-transparent data-[state=active]:border-red-600 data-[state=active]:bg-transparent data-[state=active]:text-red-600 rounded-none px-6 py-3 font-semibold"
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
                   >
                     Business
                   </TabsTrigger>
                   <TabsTrigger 
                     value="technology" 
-                    className="border-b-2 border-transparent data-[state=active]:border-red-600 data-[state=active]:bg-transparent data-[state=active]:text-red-600 rounded-none px-6 py-3 font-semibold"
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
                   >
                     Technology
                   </TabsTrigger>
                   <TabsTrigger 
                     value="health" 
-                    className="border-b-2 border-transparent data-[state=active]:border-red-600 data-[state=active]:bg-transparent data-[state=active]:text-red-600 rounded-none px-6 py-3 font-semibold"
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
                   >
                     Health
                   </TabsTrigger>
                   <TabsTrigger 
                     value="science" 
-                    className="border-b-2 border-transparent data-[state=active]:border-red-600 data-[state=active]:bg-transparent data-[state=active]:text-red-600 rounded-none px-6 py-3 font-semibold"
+                    className="border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 rounded-none px-6 py-3 font-semibold"
                   >
                     Science
                   </TabsTrigger>
@@ -312,7 +280,7 @@ const News = () => {
                     
                     {/* Latest News Grid */}
                     <div>
-                      <h2 className="text-2xl font-bold mb-6 font-serif border-l-4 border-red-600 pl-4">
+                      <h2 className="text-2xl font-bold mb-6 font-serif border-l-4 border-blue-600 pl-4">
                         Latest News
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -338,7 +306,7 @@ const News = () => {
                                   <span className="font-medium">{article.source}</span>
                                   <span>{article.time}</span>
                                 </div>
-                                <h3 className="font-bold text-lg line-clamp-2 mb-2 hover:text-red-600 font-serif">
+                                <h3 className="font-bold text-lg line-clamp-2 mb-2 hover:text-blue-600 font-serif">
                                   <a href={article.url} target="_blank" rel="noopener noreferrer">
                                     {article.title}
                                   </a>
@@ -347,12 +315,12 @@ const News = () => {
                                   {article.description}
                                 </p>
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs text-red-600 font-semibold">{article.category}</span>
+                                  <span className="text-xs text-blue-600 font-semibold">{article.category}</span>
                                   <a 
                                     href={article.url} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="text-xs text-red-600 hover:underline flex items-center"
+                                    className="text-xs text-blue-600 hover:underline flex items-center"
                                   >
                                     Read More <ExternalLink className="h-3 w-3 ml-1" />
                                   </a>
@@ -367,7 +335,7 @@ const News = () => {
                     <Card>
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold mb-4 font-serif flex items-center">
-                          <Newspaper className="h-5 w-5 mr-2 text-red-600" />
+                          <Newspaper className="h-5 w-5 mr-2 text-blue-600" />
                           News Wire - Latest Headlines
                         </h3>
                         <Table>
@@ -391,7 +359,7 @@ const News = () => {
                                 <TableCell>
                                   <a 
                                     href={article.url} 
-                                    className="hover:text-red-600 hover:underline font-medium"
+                                    className="hover:text-blue-600 hover:underline font-medium"
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                   >
