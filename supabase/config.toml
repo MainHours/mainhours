@@ -1,5 +1,7 @@
+project_id = "xmuiapxfpgqvuyzqngug"
 
-project_id = "rijldvcoabidmdmenyic"
+[functions.ai-assistant]
+verify_jwt = false
 
 [functions.news-api]
 verify_jwt = false
@@ -7,3 +9,11 @@ verify_jwt = false
 [functions.news-search]
 verify_jwt = false
 
+[functions.stock-api]
+verify_jwt = false
+
+[functions.weather-api]
+verify_jwt = false
+
+[functions.search]
+verify_jwt = false
